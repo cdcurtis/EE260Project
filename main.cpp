@@ -1,5 +1,7 @@
 #include <iostream>
 #include "Device.h"
+#include "DynamicScheduler.h"
+#include "LeveledDag.h"
 
 using namespace std;
 
