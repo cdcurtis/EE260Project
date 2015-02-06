@@ -45,20 +45,32 @@ class LeveledDag: public DagGen
 
 		while(! ScheduleNodes.empty())
 		{
+			std::vector<ScheduleNode*> level;
 			for( std:: map<int, ScheduleNode*> ::iterator it = ScheduleNodes.begin(); it != ScheduleNodes.end(); it++ )
 			{
-				std::vector<ScheduleNode*> level;
-				if (it->second->parents.size() == 0)
-					level.push_back(it->second);
-				else
-				{
+				bool parentFound= false;
+				
+				
+				
 					std:: map<int, ScheduleNode*> ::iterator parentFinder;
 					for(int i=0; i< it->second->parents.size(); ++i)
 					{
-
+					  parentFinder = ScheduleNodes.find(it->second->parents[i]->uniqueID);
+					  if(parentFinder != ScheduleNodes.end())
+					  {
+					  	parentFound = true;
+					  	break;
+					  }
 					}
-				}
+					if(! parentFound)
+						level.push_back(it->second);
 			}
+			for(int i = 0; i< level.size();++i)
+			{
+				//TODO::findin map and delete
+		
+			}
+			levels.push_back(level);
 		}
 	}
 
