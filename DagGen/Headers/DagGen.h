@@ -63,6 +63,7 @@ struct Edge{
 };
 
 class DagGen {
+protected:
 	std :: string dagName;
 	std :: vector<Vertex*> vertices;
 	std :: vector<Edge*>  edges;

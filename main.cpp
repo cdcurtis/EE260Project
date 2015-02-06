@@ -1,7 +1,7 @@
 #include <iostream>
-#include "Device.h"
-#include "DynamicScheduler.h"
-#include "LeveledDag.h"
+#include "Headers/Device.h"
+#include "Headers/DynamicScheduler.h"
+#include "Headers/LeveledDag.h"
 
 using namespace std;
 
