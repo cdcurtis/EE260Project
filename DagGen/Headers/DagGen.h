@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-enum VertexType {DISPENSE, MIX, SPLIT, WASTE, OUTPUT};
+enum VertexType {DISPENSE, DETECT, MIX, SPLIT, HEAT, WASTE, OUTPUT};
 
 struct ValidationNodeSingleReactant{
 	double concentration;
@@ -27,6 +27,12 @@ struct Vertex{
 		{
 		case DISPENSE:
 			std::cout<< "DISPENSE"<<std::endl;
+			break;
+		case DETECT:
+			std::cout<< "DETECT"<<std::endl;
+			break;
+		case HEAT:
+			std::cout<< "HEAT"<<std::endl;
 			break;
 		case MIX:
 			std::cout<< "MIX"<<std::endl;
