@@ -24,7 +24,6 @@ void InitalizeDAGs(DagGen* dag)
 
 int main()
 {
-	// I THINK THIS IS STUPID!
 	DagGen* startingPoint = new DagGen();
 	InitalizeDAGs(startingPoint);
 	
@@ -36,7 +35,7 @@ int main()
 	LDag.print();
 	
 	
-	cout<< LDag.levels[3][0]->label<<endl;
+	cout<< LDag.Levels()[3][0]->label<<endl;
 	DMFB board;
 	
 	cout << board.Modules().size()<<endl;
