@@ -24,6 +24,7 @@ void InitalizeDAGs(DagGen* dag)
 
 int main()
 {
+	// I THINK THIS IS STUPID!
 	DagGen* startingPoint = new DagGen();
 	InitalizeDAGs(startingPoint);
 	
