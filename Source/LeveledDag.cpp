@@ -9,14 +9,19 @@
 
 LeveledDag:: ~LeveledDag()
 {
+#ifdef DEBUG_DESTRUCTOR
 	std::cout << "Calling Destructor"<<std::endl;
+#endif
 	for(int i =0 ; i< levels.size();++i)
-		for(int j=0; j<levels[i].size();++j)
+		for(int j=0; j< levels[i].size();++j)
 		{
 			std:: cout << i << " " << j <<std::endl;
 			delete levels[i][j];
 
 		}
+#ifdef DEBUG_DESTRUCTOR
+	std::cout << "Leaving Destructor"<<std::endl;
+#endif
 }
 LeveledDag:: LeveledDag(DagGen dag): DagGen(dag), priority(NotSpecified)
 {

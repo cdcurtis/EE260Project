@@ -15,7 +15,11 @@ struct ScheduleNode : public Vertex
 	std::vector<ScheduleNode*> children;
 	double timeNeeded;
 	ScheduleNode(Vertex V): Vertex(V), parents(),children(), timeNeeded(0) {	}
-
+	~ScheduleNode()
+	{
+		std::cout << "Calling ScheduleNode Destructor"<<std::endl;
+		std::cout << "Leaving ScheduleNode Destructor"<<std::endl;
+	}
 };
 
 class LeveledDag: public DagGen

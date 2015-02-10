@@ -80,10 +80,17 @@ public:
 	DagGen():dagName(""), IDs(0) {}
 	~DagGen()
 	{
-		for(unsigned int i =0; i<vertices.size(); ++i)
+		std::cout << "Calling DagGen Destructor"<<std::endl;
+		for(unsigned int i =0; i<vertices.size(); ++i){
+			std::cout<< "Deleting Vertiex " << i << std:: endl;
 			delete vertices[i];
-		for(unsigned int i =0; i< edges.size(); ++i)
-			delete edges[i];
+		}
+		for(unsigned int i = edges.size(); i> 0; --i){
+			std::cout<< "Deleting Edge " << i << std:: endl;
+			//if(edges[i] != NULL)
+			delete edges[i-1];
+		}
+		std::cout << "Leaving DagGen Destructor"<<std::endl;
 	}
 	
 	Vertex * addVertex(VertexType, std :: string );

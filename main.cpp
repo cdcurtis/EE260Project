@@ -1,3 +1,5 @@
+#define DEBUG_DESTRUCTOR
+
 #include <iostream>
 #include "Headers/Device.h"
 #include "Headers/DynamicScheduler.h"
@@ -6,6 +8,8 @@
 
 
 using namespace std;
+
+
 
 void InitalizeDAGs(DagGen* dag)
 {
@@ -36,8 +40,8 @@ int main()
 	
 	
 	cout<< LDag.Levels()[3][0]->label<<endl;
-	DMFB board;
+	//DMFB board;
 	
-	cout << board.Modules().size()<<endl;
+	//cout << board.Modules().size()<<endl;
 	return 0;
 }
