@@ -6,21 +6,35 @@
 #include "Device.h"
 #include "../DagGen/Headers/DagGen.h"
 
-class DynamicScheduler
-{
-private:
+enum ScheduleType {FIFO,Operations,CriticalPath,ResourcesNeeded};
 
-	// Class Builders
-	DynamicScheduler();
-	DynamicScheduler(std:: vector<DagGen>);
-	~DynamicScheduler();
+class DynamicScheduler {
+
+	public:
+		// Class Builders
+		DynamicScheduler();
+		DynamicScheduler(std:: vector<DagGen>);
+		~DynamicScheduler();
 	
-	// Class Methods
+		// Class Methods
+		/*
+		JP: 	 FIFO, Resources Needed
+		Chris: Operations ready, Critical Path
+		*/
+		
+		int schedule(ScheduleType);
+		int scheduleFIFO();
+		int scheduleResNeed();
+		int scheduleOpReady();
+		int scheduleCritPath();
+
+	private:
+
+		std:: vector< std::vector <Module> > availableModulesAtTimestep;
+		//std:: vector< std::vector <ScheduleNode> > schduledNodes
+		//std::map <ScheduleNode, std::pair<int,int> > NodeIndexLookup;
 	
-	
-	std:: vector< std::vector <Module> > availableModulesAtTimestep;
-	//std:: vector< std::vector <ScheduleNode> > schduledNodes
-	//std::map <ScheduleNode, std::pair<int,int> > NodeIndexLookup;
+
 };
 
 #endif //__DYNAMICSCHEDULER_H__
