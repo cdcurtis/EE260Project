@@ -9,8 +9,15 @@
 class DynamicScheduler
 {
 private:
+
+	// Class Builders
 	DynamicScheduler();
 	DynamicScheduler(std:: vector<DagGen>);
+	~DynamicScheduler();
+	
+	// Class Methods
+	
+	
 	std:: vector< std::vector <Module> > availableModulesAtTimestep;
 	//std:: vector< std::vector <ScheduleNode> > schduledNodes
 	//std::map <ScheduleNode, std::pair<int,int> > NodeIndexLookup;
