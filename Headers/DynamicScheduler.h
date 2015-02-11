@@ -4,10 +4,13 @@
 #include <iostream>
 #include <vector>
 #include "Device.h"
+#include "../DagGen/Headers/DagGen.h"
 
-class Scheduler
+class DynamicScheduler
 {
 private:
+	DynamicScheduler();
+	DynamicScheduler(std:: vector<DagGen>);
 	std:: vector< std::vector <Module> > availableModulesAtTimestep;
 	//std:: vector< std::vector <ScheduleNode> > schduledNodes
 	//std::map <ScheduleNode, std::pair<int,int> > NodeIndexLookup;
