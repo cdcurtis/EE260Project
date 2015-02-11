@@ -81,17 +81,18 @@ public:
 	~DagGen()
 	{
 		//TODO:: THERE IS A BUG HERE!!!!!!!!
-		std::cout << "Calling DagGen Destructor"<<std::endl;
+		
 	/*	for(unsigned int i =vertices.size(); i>0; --i){
 			std::cout<< "Deleting Vertiex " << i << std:: endl;
 			delete vertices[i-1];
 		}
+		 		
 		for(unsigned int i = edges.size(); i> 0; --i){
 			std::cout<< "Deleting Edge " << i << std:: endl;
 			//if(edges[i] != NULL)
 			delete edges[i-1];
 		}
-		*/std::cout << "Leaving DagGen Destructor"<<std::endl;
+		*/
 	}
 	
 	Vertex * addVertex(VertexType, std :: string );

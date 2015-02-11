@@ -17,8 +17,22 @@ struct ScheduleNode : public Vertex
 	ScheduleNode(Vertex V): Vertex(V), parents(),children(), timeNeeded(0) {	}
 	~ScheduleNode()
 	{
+	#ifdef DEBUG_DESTRUCTOR
 		std::cout << "Calling ScheduleNode Destructor"<<std::endl;
 		std::cout << "Leaving ScheduleNode Destructor"<<std::endl;
+	#endif
+	}
+	
+	inline bool operator==( const ScheduleNode& rhs)
+	{
+		if(this->timeNeeded != rhs.timeNeeded)
+			return false;
+		if(this->type != rhs.type)
+			return false;
+		if(this->label != rhs.label)
+			return false;
+			
+		return true;
 	}
 };
 

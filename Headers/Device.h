@@ -63,7 +63,7 @@ class Device
 protected:
 	OperationTimer timer;
 	std::vector<Module> modules;
-
+public:
 	Device() {}
 	~Device()
 	{

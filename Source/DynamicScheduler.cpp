@@ -38,28 +38,43 @@ DynamicScheduler::~DynamicScheduler() {
 	@params		ScheduleType
 	@returns		int				status code
 	========================================================================== */
-int DynamicScheduler::schedule(ScheduleType type) {
+int DynamicScheduler::schedule(ScheduleType type, Device deviceType, Schedule& schedule) {
 	switch(type) {
 
 		case FIFO:
-			
-		break;
+			return scheduleFIFO(deviceType, schedule);
 		
 		case Operations:
-		
-		break;
+			return scheduleOpReady(deviceType, schedule);
 		
 		case CriticalPath:
-		
-		break;
+			return scheduleCritPath(deviceType, schedule);
 		
 		case ResourcesNeeded:
-		
-		break;
+		  return scheduleResNeed(deviceType, schedule);
 		
 		default:
-			// FIFO
-		break;
+			return scheduleFIFO(deviceType, schedule);
 	}
 	return 0;
 }
+
+int DynamicScheduler::scheduleFIFO(Device deviceType, Schedule& schedule) 
+{
+	return -1;
+}
+
+int DynamicScheduler::scheduleOpReady(Device deviceType, Schedule& schedule) 
+{
+	return -1;
+}
+
+int DynamicScheduler::scheduleCritPath(Device deviceType, Schedule& schedule) 
+{
+	return -1;
+}
+
+int DynamicScheduler::scheduleResNeed(Device deviceType, Schedule& schedule) 
+{
+	return -1;
+	}

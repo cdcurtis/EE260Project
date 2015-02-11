@@ -4,9 +4,11 @@
 #include <iostream>
 #include <vector>
 #include "Device.h"
+#include "Schedule.h"
 #include "../DagGen/Headers/DagGen.h"
 
 enum ScheduleType {FIFO,Operations,CriticalPath,ResourcesNeeded};
+
 
 class DynamicScheduler {
 
@@ -22,17 +24,13 @@ class DynamicScheduler {
 		Chris: Operations ready, Critical Path
 		*/
 		
-		int schedule(ScheduleType);
-		int scheduleFIFO();
-		int scheduleResNeed();
-		int scheduleOpReady();
-		int scheduleCritPath();
+		int schedule(ScheduleType,Device, Schedule&);
+		int scheduleFIFO(Device, Schedule&);
+		int scheduleResNeed(Device, Schedule&);
+		int scheduleOpReady(Device, Schedule&);
+		int scheduleCritPath(Device, Schedule&);
 
 	private:
-
-		std:: vector< std::vector <Module> > availableModulesAtTimestep;
-		//std:: vector< std::vector <ScheduleNode> > schduledNodes
-		//std::map <ScheduleNode, std::pair<int,int> > NodeIndexLookup;
 	
 
 };
