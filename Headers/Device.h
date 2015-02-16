@@ -60,18 +60,13 @@ public:
 
 class Device
 {
-protected:
+public:
 	OperationTimer timer;
 	std::vector<Module> modules;
-public:
+
 	Device() {}
-	~Device()
-	{
-#ifdef DEBUG_DESTRUCTOR
-		std::cout << "Calling Device Destructor"<<std::endl;
-		std::cout << "Leaving Device Destructor"<<std::endl;
-#endif
-	}
+	virtual ~Device()=0;
+
 };
 
 class DMFB : public Device
@@ -91,7 +86,16 @@ public:
 
 		for(int i=0; i<4 ;++i)
 			modules.push_back(Module("Dispense/output",0x60,0));
-	}	
+
+		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("dispense",1));
+		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("detect",5));
+		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("mix",4));
+		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("split",1));
+		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("store",1));
+		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("heat",10));
+		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("output",1));
+
+}
 
 	std::vector<Module> Modules() { return modules; }
 };

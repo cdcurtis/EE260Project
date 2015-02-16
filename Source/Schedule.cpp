@@ -1,0 +1,222 @@
+/*
+ * Schedule.cpp
+ *
+ *  Created on: Feb 16, 2015
+ *      Author: Chris
+ */
+#include <cmath>
+#include "../Headers/Schedule.h"
+
+using namespace std;
+
+void Schedule:: CreateNewTimeStep()
+{
+	vector<Module> temp = _device->modules;
+	availableModulesAtTimestep.push_back(temp);
+
+	vector<ScheduleNode*> nodes;
+
+	schduledNodes.push_back(nodes);
+}
+
+double Schedule:: GetOperationTime(VertexType OP)
+{
+	string operation;
+	switch (OP) {
+	case DISPENSE:
+		operation = "dispense";
+		break;
+	case DETECT:
+		operation = "detect";
+		break;
+	case HEAT:
+		operation = "heat";
+		break;
+	case MIX:
+		operation = "mix";
+		break;
+	case SPLIT:
+		operation = "split";
+		break;
+	case STORE:
+		operation = "store";
+		break;
+	case OUTPUT:
+		operation = "output";
+		break;
+	default:
+		break;
+	}
+
+	map<string, double>::iterator optime;
+	optime = _device->timer.MinTimeForOpComp.find(operation);
+	if(optime!= _device->timer.MinTimeForOpComp.end())
+		return optime->second;
+	return 1;
+}
+
+
+bool Schedule::CanAddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
+{
+	double OPTime = max(GetOperationTime(OP->type), OP->timeNeeded);
+
+	int endTime =startingTime+OPTime;
+	for(int i = startingTime; i< endTime;++i)
+	{
+		if(!CanAddOperationAtTime(OP,i))
+			return false;
+	}
+	return true;
+}
+bool Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
+{
+	if(!CanAddOperationStartingAtTime(OP,startingTime))
+		return false;
+
+	int OPTime = max(GetOperationTime(OP->type), OP->timeNeeded);
+
+	int endTime =startingTime+OPTime;
+	for(int i = startingTime; i< endTime;++i)
+		AddOperationAtTime(OP,i);
+	return true;
+}
+
+bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
+{
+	//check that my parents are not also here.
+	map <ScheduleNode*, std::pair<int,int> >::iterator parentCheck;
+	for(unsigned int i=0; i< OP->parents.size(); ++i) {
+		parentCheck = nodeIndexLookup.find(OP->parents[i]);
+		if(parentCheck!= nodeIndexLookup.end()) {
+			if (parentCheck->second.first == time)
+				return false;
+		}
+	}
+
+	for(unsigned int i=0; i< availableModulesAtTimestep[time].size(); ++i)
+	{ //simple method, check to see if that resource is available.
+		switch (OP->type) {
+		case DISPENSE:
+			if(availableModulesAtTimestep[time][i].CanDispense()) {
+				index = i;
+				return true;
+			}
+			break;
+		case DETECT:
+			if(availableModulesAtTimestep[time][i].CanDetect()) {
+				index = i;
+				return true;
+			}
+			break;
+		case HEAT:
+			if(availableModulesAtTimestep[time][i].CanHeat()) {
+				index = i;
+				return true;
+			}
+			break;
+		case MIX:
+			if(availableModulesAtTimestep[time][i].CanMix()) {
+				index = i;
+				return true;
+			}
+			break;
+		case SPLIT:
+			if(availableModulesAtTimestep[time][i].CanSplit())
+				return true;
+			break;
+		case STORE:
+			if(availableModulesAtTimestep[time][i].CanStore()) {
+				index = i;
+				return true;
+			}
+			break;
+		case OUTPUT:
+			if(availableModulesAtTimestep[time][i].CanOutput()) {
+				index = i;
+				return true;
+
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	return false;
+}
+
+bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time)
+{
+	int trash;
+	return CanAddOperationAtTime(OP,time,trash);
+}
+
+bool Schedule::AddOperationAtTime(ScheduleNode* OP, int time)
+{
+	int index;
+	if(CanAddOperationAtTime(OP,time,index))
+	{
+		availableModulesAtTimestep.erase(availableModulesAtTimestep.begin()+index);
+
+		int insertIndex = schduledNodes.size();
+		schduledNodes[time].push_back(OP);
+
+		nodeIndexLookup.insert(pair<ScheduleNode*,pair<int,int> >(OP,pair<int,int>(time,insertIndex)));
+		return false;
+	}
+	cerr<<"Cannot add Operation "<< OP->label <<" at time: "<< time<< endl;
+	return false;
+}
+
+bool Schedule::RemoveOperatationAt(unsigned int time,unsigned int nodeIndex)
+{
+	if(schduledNodes.size()<time){
+		cerr<<"Trying to access out of bounds time step\n"<< "Time step:" <<time <<" Size:" << schduledNodes.size()<<endl;
+		return false;
+	}
+
+	if(schduledNodes[time].size()<nodeIndex){
+		cerr<<"Trying to access out of bounds Node\n"<< "Node index:" <<nodeIndex <<" Size:" << schduledNodes[time].size()<<endl;
+		return false;
+	}
+
+	ScheduleNode* RemoveME = schduledNodes[time][nodeIndex];
+
+	schduledNodes[time].erase(schduledNodes[time].begin()+nodeIndex);
+
+	if(nodeIndexLookup.find(RemoveME) != nodeIndexLookup.end())
+		nodeIndexLookup.erase(nodeIndexLookup.find(RemoveME));
+
+	ReplaceModule(RemoveME,time);
+
+	return true;
+}
+
+void Schedule::ReplaceModule(ScheduleNode* node,int time)
+{
+	if(dynamic_cast<DMFB*>(_device) !=0){
+		switch (node->type) {
+			case DISPENSE:
+			case OUTPUT:
+				availableModulesAtTimestep[time].push_back(Module("Dispense/output",0x60,0));
+				break;
+			case DETECT:
+			case HEAT:
+			case MIX:
+			case SPLIT:
+			case STORE:
+				availableModulesAtTimestep[time].push_back(Module("WorkerModule",0x1F,2));
+				break;
+			default:
+				break;
+		}
+	}
+
+}
+
+
+
+
+
+
+

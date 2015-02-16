@@ -38,43 +38,48 @@ DynamicScheduler::~DynamicScheduler() {
 	@params		ScheduleType
 	@returns		int				status code
 	========================================================================== */
-int DynamicScheduler::schedule(ScheduleType type, Device deviceType, Schedule& schedule) {
+int DynamicScheduler::schedule(ScheduleType type, Device* deviceType, Schedule& schedule,  std::vector<LeveledDag>& dags) {
+
+	//initialize the scheduler.
+
+
+
 	switch(type) {
 
 		case FIFO:
-			return scheduleFIFO(deviceType, schedule);
+			return scheduleFIFO(deviceType, schedule, dags);
 		
 		case Operations:
-			return scheduleOpReady(deviceType, schedule);
+			return scheduleOpReady(deviceType, schedule, dags);
 		
 		case CriticalPath:
-			return scheduleCritPath(deviceType, schedule);
+			return scheduleCritPath(deviceType, schedule, dags);
 		
 		case ResourcesNeeded:
-		  return scheduleResNeed(deviceType, schedule);
+		  return scheduleResNeed(deviceType, schedule, dags);
 		
 		default:
-			return scheduleFIFO(deviceType, schedule);
+			return scheduleFIFO(deviceType, schedule, dags);
 	}
 	return 0;
 }
 
-int DynamicScheduler::scheduleFIFO(Device deviceType, Schedule& schedule) 
+int DynamicScheduler::scheduleFIFO(Device* deviceType, Schedule& schedule, std::vector<LeveledDag> & dags)
 {
 	return -1;
 }
 
-int DynamicScheduler::scheduleOpReady(Device deviceType, Schedule& schedule) 
+int DynamicScheduler::scheduleOpReady(Device* deviceType, Schedule& schedule, std::vector<LeveledDag>& dags)
 {
 	return -1;
 }
 
-int DynamicScheduler::scheduleCritPath(Device deviceType, Schedule& schedule) 
+int DynamicScheduler::scheduleCritPath(Device* deviceType, Schedule& schedule, std::vector<LeveledDag>& dags)
 {
 	return -1;
 }
 
-int DynamicScheduler::scheduleResNeed(Device deviceType, Schedule& schedule) 
+int DynamicScheduler::scheduleResNeed(Device* deviceType, Schedule& schedule, std::vector<LeveledDag>& dags)
 {
 	return -1;
 	}

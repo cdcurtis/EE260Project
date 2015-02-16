@@ -2,13 +2,13 @@
 
 #include <iostream>
 #include "Headers/Device.h"
+#include "Headers/Schedule.h"
 #include "Headers/DynamicScheduler.h"
 #include "Headers/LeveledDag.h"
 #include "DagGen/Headers/DagGen.h"
 
 
 using namespace std;
-
 
 
 void InitalizeDAGs(vector<DagGen*>& dags);
@@ -21,14 +21,13 @@ int main()
 	
 	startingPoint[0]->generateDotyGraph();
 	
+	for(int i =0 ;i< startingPoint.size(); ++i)
+	{
+		LeveledDag LDag(*startingPoint[i]);
+		LDag.print();
+	}
 	
-	LeveledDag LDag(*startingPoint[0]);
-	
-	LDag.print();
-	
-	
-	cout<< LDag.Levels()[3][0]->label<<endl;
-	//DMFB board;
+
 	
 	//cout << board.Modules().size()<<endl;
 	return 0;
@@ -139,7 +138,7 @@ void InitalizeDAGs(vector<DagGen*>& dags)
 	
 	Vertex * mt8_Mix = MixTree8->addVertex(MIX, "Mix");
 	Vertex * mt8_Mix2 = MixTree8->addVertex(MIX, "Mix2");
-	Vertex * mt8_Mix3 = MixTree8->addVertex(MIX, "Mix3");	
+	Vertex * mt8_Mix3 = MixTree8->addVertex(MIX, "Mix3");
 	Vertex * mt8_Mix4 = MixTree8->addVertex(MIX, "Mix4");
 	Vertex * mt8_Mix5 = MixTree8->addVertex(MIX, "Mix5");
 	Vertex * mt8_Mix6 = MixTree8->addVertex(MIX, "Mix6");

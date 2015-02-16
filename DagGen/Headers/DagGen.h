@@ -5,7 +5,9 @@
 #include <vector>
 #include <map>
 
-enum VertexType {DISPENSE, DETECT, MIX, SPLIT, HEAT, WASTE, OUTPUT};
+
+
+enum VertexType {DISPENSE, DETECT, MIX, SPLIT, STORE, HEAT, WASTE, OUTPUT};
 
 struct ValidationNodeSingleReactant{
 	double concentration;
@@ -40,7 +42,7 @@ struct Vertex{
 		case SPLIT:
 			std::cout<< "SPLIT"<<std::endl;
 			break;
-		case WASTE:
+		case  WASTE:
 		case OUTPUT:
 			std::cout<< "OUTPUT"<<std::endl;
 			break;
@@ -129,5 +131,6 @@ public:
 	void outputVertices() const;
 	void outputEdges() const;
 };
+
 
 #endif /*__DAGGEN__H_*/

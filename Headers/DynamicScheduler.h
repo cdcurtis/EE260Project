@@ -5,7 +5,7 @@
 #include <vector>
 #include "Device.h"
 #include "Schedule.h"
-#include "../DagGen/Headers/DagGen.h"
+#include "LeveledDag.h"
 
 enum ScheduleType {FIFO,Operations,CriticalPath,ResourcesNeeded};
 
@@ -24,11 +24,11 @@ class DynamicScheduler {
 		Chris: Operations ready, Critical Path
 		*/
 		
-		int schedule(ScheduleType,Device, Schedule&);
-		int scheduleFIFO(Device, Schedule&);
-		int scheduleResNeed(Device, Schedule&);
-		int scheduleOpReady(Device, Schedule&);
-		int scheduleCritPath(Device, Schedule&);
+		int schedule(ScheduleType, Device*, Schedule&, std::vector<LeveledDag>&);
+		int scheduleFIFO(Device*, Schedule&, std::vector<LeveledDag>&);
+		int scheduleResNeed(Device*, Schedule&, std::vector<LeveledDag>&);
+		int scheduleOpReady(Device*, Schedule&, std::vector<LeveledDag>&);
+		int scheduleCritPath(Device*, Schedule&, std::vector<LeveledDag>&);
 
 	private:
 	
