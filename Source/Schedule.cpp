@@ -68,21 +68,24 @@ bool Schedule::CanAddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 	}
 	return true;
 }
-bool Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
+int Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 {
+//TODO:: add add new timestep if running into the end of the buffer.
 	if(!CanAddOperationStartingAtTime(OP,startingTime))
-		return false;
+		return -1;
 
 	int OPTime = max(GetOperationTime(OP->type), OP->timeNeeded);
 
 	int endTime =startingTime+OPTime;
+	
 	for(int i = startingTime; i< endTime;++i)
 		AddOperationAtTime(OP,i);
-	return true;
+	return endTime;
 }
 
 bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
 {
+
 	//check that my parents are not also here.
 	map <ScheduleNode*, std::pair<int,int> >::iterator parentCheck;
 	for(unsigned int i=0; i< OP->parents.size(); ++i) {

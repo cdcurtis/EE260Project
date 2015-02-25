@@ -23,6 +23,12 @@ struct ScheduleNode : public Vertex
 	#endif
 	}
 	
+	
+	/*
+		Overloaded Comparison operator
+			this function is the overloaded equality operator. This allows ScheduleNodes to be compared to each other.
+	*/
+	
 	inline bool operator==( const ScheduleNode& rhs)
 	{
 		if(this->timeNeeded != rhs.timeNeeded)
@@ -46,6 +52,13 @@ public:
 
 	~LeveledDag();
 	LeveledDag(DagGen dag);
+	
+	/*
+	Function: Print
+	Parameters: 
+	
+	Currently a simple command line output to allow debugging. Outputs each level by line. 
+	*/
 	void print();
 
 	std::vector < std:: vector <ScheduleNode*> > Levels() { return levels; }

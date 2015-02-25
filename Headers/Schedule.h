@@ -35,15 +35,48 @@ public:
 		_device = d;
 		_timer = d->timer;
 	}
-
+	/*
+		Function: CreateNewTimeStep
+		Parameters:
+		
+		Adds a new vector to the bottom the of availableModulesAtTimeStep.
+	*/
 	void CreateNewTimeStep();
+	
+	/*
+		Function: CanAddOperationStartingAtTime
+		Parameters: Schedule Node to be inserted, Time step to start looking. 
+		Returns: True if the scheduleNode can be insert. otherwise false.
+		
+		Checks the device constraints on the operation also the time needed within the Vertex, 
+		and we take the max between the two to decide the running time(N) of the operation. 
+		We check the next N time steps to see if the node can be added here. 
+	*/
 	bool CanAddOperationStartingAtTime(ScheduleNode*, int);
-	bool AddOperationStartingAtTime(ScheduleNode*, int);
 
+	/*
+		Function: AddOperationStartingAtTime
+		Parameters: Schedule Node to be inserted, Time step to start looking. 
+		Returns: The ending time position of the operation, or -1 for fail.
+		
+		This function checks to see if the node can be inserted, if it cannot then returns -1. 
+		Otherwise it adds the ScheduledNode to the schedule and returns the endtime of the 
+		operation.
+	*/
+	int AddOperationStartingAtTime(ScheduleNode*, int);
+
+	/*
+		Function: RemoveOperationAt
+		Parameter: TimeStep, NodeIndex
+		Return: true if successfully removes operation, false if an error occurred. 
+		
+	*/
 	bool RemoveOperatationAt(unsigned int,unsigned int);
-	void ReplaceModule(ScheduleNode*, int);
-
+	
+	
 private:
+	
+	void ReplaceModule(ScheduleNode*, int);
 	bool CanAddOperationAtTime(ScheduleNode*, int, int& );
 	bool CanAddOperationAtTime(ScheduleNode*, int);
 	bool AddOperationAtTime(ScheduleNode*, int );
