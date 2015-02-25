@@ -1,6 +1,7 @@
 #include "../Headers/DynamicScheduler.h"
+#include<cmath>
 
-
+using namespace std;
 DynamicScheduler::DynamicScheduler() {
 	// Default
 }
@@ -21,48 +22,77 @@ DynamicScheduler::~DynamicScheduler() {
 	@params		ScheduleType
 	@returns		int				status code
 	========================================================================== */
-int DynamicScheduler::schedule(ScheduleType type, Device* deviceType, Schedule& schedule,  std::vector<LeveledDag>& dags) {
-
-	//initialize the scheduler.
+int DynamicScheduler::schedule(ScheduleType type, Schedule& schedule,  std::vector<LeveledDag>& dags) {
 
 
 
 	switch(type) {
 
 		case FIFO:
-			return scheduleFIFO(deviceType, schedule, dags);
+			return scheduleFIFO(schedule, dags);
 		
 		case Operations:
-			return scheduleOpReady(deviceType, schedule, dags);
+			return scheduleOpReady(schedule, dags);
 		
 		case CriticalPath:
-			return scheduleCritPath(deviceType, schedule, dags);
+			return scheduleCritPath(schedule, dags);
 		
 		case ResourcesNeeded:
-		  return scheduleResNeed(deviceType, schedule, dags);
+		  return scheduleResNeed(schedule, dags);
 		
 		default:
-			return scheduleFIFO(deviceType, schedule, dags);
+			return scheduleFIFO(schedule, dags);
 	}
 	return 0;
 }
 
-int DynamicScheduler::scheduleFIFO(Device* deviceType, Schedule& schedule, std::vector<LeveledDag> & dags)
+int DynamicScheduler::scheduleFIFO(Schedule& schedule, std::vector<LeveledDag> & dags)
 {
 	return -1;
 }
 
-int DynamicScheduler::scheduleOpReady(Device* deviceType, Schedule& schedule, std::vector<LeveledDag>& dags)
+int DynamicScheduler::scheduleOpReady(Schedule& schedule, std::vector<LeveledDag>& dags)
 {
 	return -1;
 }
 
-int DynamicScheduler::scheduleCritPath(Device* deviceType, Schedule& schedule, std::vector<LeveledDag>& dags)
+int DynamicScheduler::scheduleCritPath(Schedule& schedule, std::vector<LeveledDag>& dags)
 {
+	//Order the Dags by critical path. Largest first.
+	CalculateCritcalPaths(schedule,dags);
+	while(dags.size() != 0)
+	{
+		for(unsigned int i =0; i< dags.size(); ++i)
+		{
+			//TODO:: pick largest crit path and schedule then delete dag from list.
+		}
+	}
+
 	return -1;
 }
+void DynamicScheduler::CalculateCritcalPaths(Schedule& schedule, std::vector<LeveledDag>& dags)
+{
+	for(unsigned int i = 0 ; i <dags.size(); ++i)
+	{
+		double critcalPathSize =0 ;
+		for(unsigned int level=0; level < dags[i].Levels().size(); ++level)
+		{
+			double maxAtLevel =0;
+			for(unsigned nodeIndex =0; nodeIndex < dags[i].Levels().at(level).size(); ++nodeIndex )
+			{
+				ScheduleNode n= dags[i].Levels[i]().at(level).at(nodeIndex);
+				double nodeSize = max(n.timeNeeded, schedule.GetOperationTime(n.type));
 
-int DynamicScheduler::scheduleResNeed(Device* deviceType, Schedule& schedule, std::vector<LeveledDag>& dags)
+				if(maxAtLevel<nodeSize)
+					maxAtLevel = nodeSize;
+			}
+			critcalPathSize += maxAtLevel;
+		}
+		dags[i].CriticalPathSize() = critcalPathSize;
+	}
+}
+
+int DynamicScheduler::scheduleResNeed(Schedule& schedule, std::vector<LeveledDag>& dags)
 {
 	return -1;
 	}

@@ -21,7 +21,7 @@ int main()
 	
 	startingPoint[0]->generateDotyGraph();
 	
-	for(int i =0 ;i< startingPoint.size(); ++i)
+	for(unsigned int i =0 ;i< startingPoint.size(); ++i)
 	{
 		LeveledDag LDag(*startingPoint[i]);
 		LDag.print();

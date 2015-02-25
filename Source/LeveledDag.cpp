@@ -23,7 +23,7 @@ LeveledDag:: ~LeveledDag()
 	std::cout << "Leaving Destructor"<<std::endl;
 #endif
 }
-LeveledDag:: LeveledDag(DagGen dag): DagGen(dag), priority(NotSpecified)
+LeveledDag:: LeveledDag(DagGen dag): DagGen(dag),criticalPathSize(-1), priority(NotSpecified)
 {
 
 	std:: map<int, ScheduleNode*> ::iterator child;

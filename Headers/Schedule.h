@@ -73,14 +73,19 @@ public:
 	*/
 	bool RemoveOperatationAt(unsigned int,unsigned int);
 	
-	
+	/*
+	 Function: GetOperationTime
+	 Parameters: VertexType(enum)
+	 Return: returns min time needed on the device to perform operation.
+	*/
+	double GetOperationTime(VertexType);
 private:
 	
 	void ReplaceModule(ScheduleNode*, int);
 	bool CanAddOperationAtTime(ScheduleNode*, int, int& );
 	bool CanAddOperationAtTime(ScheduleNode*, int);
 	bool AddOperationAtTime(ScheduleNode*, int );
-	double GetOperationTime(VertexType);
+
 	Device* _device;
 	OperationTimer _timer;
 };

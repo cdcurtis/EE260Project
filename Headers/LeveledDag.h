@@ -45,6 +45,7 @@ struct ScheduleNode : public Vertex
 class LeveledDag: public DagGen
 {
 private:
+	double criticalPathSize;
 	SchedulePriorty priority;
 	std::vector < std:: vector <ScheduleNode*> > levels;
 
@@ -60,7 +61,7 @@ public:
 	Currently a simple command line output to allow debugging. Outputs each level by line. 
 	*/
 	void print();
-
+	double & CriticalPathSize() { return criticalPathSize; }
 	std::vector < std:: vector <ScheduleNode*> > Levels() { return levels; }
 
 };
