@@ -13,7 +13,7 @@ CFLAGS = -c -Wall
 # ============================================
 DAGGEN_SRC = DagGen/Source/
 DYNSCHED_SRC = Source/
-DYNSCHED_OBJECTS = DynamicScheduler.o Device.o LeveledDag.o DagGen.o
+DYNSCHED_OBJECTS = DynamicScheduler.o Device.o LeveledDag.o DagGen.o Schedule.o
 
 # ============================================
 # make commands
@@ -27,6 +27,9 @@ clean:
 	rm -f *.o 
 
 # CPP -> Objects
+Schedule.o: $(DYNSCHED_SRC)Schedule.cpp
+	$(CC) $(CFLAGS) $(DYNSCHED_SRC)Schedule.cpp
+
 DynamicScheduler.o: $(DYNSCHED_SRC)DynamicScheduler.cpp
 	$(CC) $(CFLAGS) $(DYNSCHED_SRC)DynamicScheduler.cpp
 	
