@@ -18,22 +18,10 @@ public:
 	std::map <ScheduleNode*, std::pair<int,int> > nodeIndexLookup;
 
 
-	Schedule(Device* d)
+	Schedule(DMFB d)
 	{
-		if(d == NULL){
-			std::cerr<<"The device for the schedule cannot be found.\n";
-			std::exit(-1);
-		}
-
-		//check that the device pointer is valid.
-		DMFB* dmfb = dynamic_cast<DMFB*>(d);
-		if(dmfb == 0) { //this checks for the null pointers
-			std::cerr<<"The device type is not recognized\n";
-			std::exit(-2);
-		}
-
 		_device = d;
-		_timer = d->timer;
+		_timer = d.timer;
 	}
 	/*
 		Function: CreateNewTimeStep
@@ -79,6 +67,23 @@ public:
 	 Return: returns min time needed on the device to perform operation.
 	*/
 	double GetOperationTime(VertexType);
+
+	/*
+	 * Function: FindFirstOpening
+	 * Parameters: the node to be fitted in, optional starting time point.
+	 * Returns the time index of the first open slot in schedule a -1 return if a starting point could not be found. This should never happen.
+	 */
+
+	int FindFirstOpening(ScheduleNode*, int startTime = 0);
+
+	/*
+	 * Function SchdeuleNodeASAP
+	 * Parameters: ScheduleNode to be added.
+	 *
+	 * Schedules the Node at the earliest available time.
+	 */
+	void ScheduleNodeASAP(ScheduleNode*);
+	void Print();
 private:
 	
 	void ReplaceModule(ScheduleNode*, int);
@@ -86,7 +91,7 @@ private:
 	bool CanAddOperationAtTime(ScheduleNode*, int);
 	bool AddOperationAtTime(ScheduleNode*, int );
 
-	Device* _device;
+	DMFB _device;
 	OperationTimer _timer;
 };
 

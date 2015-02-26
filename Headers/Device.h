@@ -58,26 +58,13 @@ public:
 	bool CanOutput();	
 };
 
-class Device
-{
-public:
-	OperationTimer timer;
-	std::vector<Module> modules;
 
-	Device() {}
-	virtual ~Device()=0;
-
-};
-
-class DMFB : public Device
+class DMFB
 {
 public:
 	~DMFB()
 	{
-#ifdef DEBUG_DESTRUCTOR
-		std::cout << "Calling DMFB Destructor"<<std::endl;
-		std::cout << "Leaving DMFB Destructor"<<std::endl;
-#endif
+
 	}
 	DMFB()
 	{
@@ -96,7 +83,8 @@ public:
 		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("output",1));
 
 }
-
+	OperationTimer timer;
+	std::vector<Module> modules;
 	std::vector<Module> Modules() { return modules; }
 };
 

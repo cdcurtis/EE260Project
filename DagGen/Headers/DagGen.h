@@ -73,12 +73,13 @@ struct Edge{
 class DagGen {
 protected:
 	std :: string dagName;
-	std :: vector<Vertex*> vertices;
-	std :: vector<Edge*>  edges;
+
 	int IDs;
 	 
 	std::map<int, std :: vector<int> > createDependencyMap();
 public:
+	std :: vector<Vertex*> vertices;
+	std :: vector<Edge*>  edges;
 	DagGen():dagName(""), IDs(0) {}
 	~DagGen()
 	{

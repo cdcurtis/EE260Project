@@ -5,13 +5,14 @@
  *      Author: Chris
  */
 #include <cmath>
+#include <iostream>
 #include "../Headers/Schedule.h"
 
 using namespace std;
 
 void Schedule:: CreateNewTimeStep()
 {
-	vector<Module> temp = _device->modules;
+	vector<Module> temp = _device.modules;
 	availableModulesAtTimestep.push_back(temp);
 
 	vector<ScheduleNode*> nodes;
@@ -49,12 +50,44 @@ double Schedule:: GetOperationTime(VertexType OP)
 	}
 
 	map<string, double>::iterator optime;
-	optime = _device->timer.MinTimeForOpComp.find(operation);
-	if(optime!= _device->timer.MinTimeForOpComp.end())
+	optime = _device.timer.MinTimeForOpComp.find(operation);
+	if(optime!= _device.timer.MinTimeForOpComp.end())
 		return optime->second;
 	return 1;
 }
 
+int Schedule:: FindFirstOpening(ScheduleNode* Op, int startTime)
+{
+	for(;startTime < availableModulesAtTimestep.size(); ++startTime) {
+		if(CanAddOperationStartingAtTime(Op,startTime))
+			return startTime;
+	}
+	return -1;
+}
+
+void Schedule:: ScheduleNodeASAP(ScheduleNode* node)
+{
+	int startingPoint = this->FindFirstOpening(node);
+	int endingPoint = AddOperationStartingAtTime(node, startingPoint);
+	if (endingPoint == -1) {
+		cerr<<"Finding Starting Point is Not correct.\n";
+	}
+	else
+	{
+		node->timeStarted = startingPoint;
+		node->timeEnded = endingPoint;
+	}
+}
+void Schedule::Print()
+{
+	for(unsigned int i=0; i< schduledNodes.size(); ++i) {
+		cout<< "Time: "<< i << " ";
+		for(unsigned int j =0; j < schduledNodes[i].size(); ++j) {
+			cout << schduledNodes[i][j]->label << " ";
+		}
+		cout<< endl;
+	}
+}
 
 bool Schedule::CanAddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 {
@@ -83,7 +116,7 @@ int Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 
 
 	int endTime =startingTime+OPTime;
-	
+
 
 	if (endTime >= availableModulesAtTimestep.size())
 	{
@@ -98,6 +131,8 @@ int Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 
 bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
 {
+	if (time >= availableModulesAtTimestep.size())
+		return true;
 
 	//check that my parents are not also here.
 	map <ScheduleNode*, std::pair<int,int> >::iterator parentCheck;
@@ -178,6 +213,9 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time)
 
 bool Schedule::AddOperationAtTime(ScheduleNode* OP, int time)
 {
+	if(time >= availableModulesAtTimestep.size())
+		this->CreateNewTimeStep();
+
 	int index;
 	if(CanAddOperationAtTime(OP,time,index))
 	{
@@ -219,22 +257,21 @@ bool Schedule::RemoveOperatationAt(unsigned int time,unsigned int nodeIndex)
 
 void Schedule::ReplaceModule(ScheduleNode* node,int time)
 {
-	if(dynamic_cast<DMFB*>(_device) !=0){
-		switch (node->type) {
-			case DISPENSE:
-			case OUTPUT:
-				availableModulesAtTimestep[time].push_back(Module("Dispense/output",0x60,0));
-				break;
-			case DETECT:
-			case HEAT:
-			case MIX:
-			case SPLIT:
-			case STORE:
-				availableModulesAtTimestep[time].push_back(Module("WorkerModule",0x1F,2));
-				break;
-			default:
-				break;
-		}
+
+	switch (node->type) {
+	case DISPENSE:
+	case OUTPUT:
+		availableModulesAtTimestep[time].push_back(Module("Dispense/output",0x60,0));
+		break;
+	case DETECT:
+	case HEAT:
+	case MIX:
+	case SPLIT:
+	case STORE:
+		availableModulesAtTimestep[time].push_back(Module("WorkerModule",0x1F,2));
+		break;
+	default:
+		break;
 	}
 
 }

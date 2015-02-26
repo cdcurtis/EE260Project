@@ -14,6 +14,8 @@ struct ScheduleNode : public Vertex
 	std:: vector<ScheduleNode*> parents;
 	std::vector<ScheduleNode*> children;
 	double timeNeeded;
+	int timeStarted;
+	int timeEnded;
 	ScheduleNode(Vertex V): Vertex(V), parents(),children(), timeNeeded(0) {	}
 	~ScheduleNode()
 	{
@@ -42,16 +44,18 @@ struct ScheduleNode : public Vertex
 	}
 };
 
-class LeveledDag: public DagGen
+class LeveledDag
 {
 private:
 	double criticalPathSize;
 	SchedulePriorty priority;
 	std::vector < std:: vector <ScheduleNode*> > levels;
 
+	void CompressLevels();
 public:
 
 	~LeveledDag();
+	LeveledDag();
 	LeveledDag(DagGen dag);
 	
 	/*
@@ -61,6 +65,8 @@ public:
 	Currently a simple command line output to allow debugging. Outputs each level by line. 
 	*/
 	void print();
+	int FindLevel(ScheduleNode*);
+	bool CanNodeBeDelayed (ScheduleNode*, int = -1);
 	double & CriticalPathSize() { return criticalPathSize; }
 	std::vector < std:: vector <ScheduleNode*> > Levels() { return levels; }
 

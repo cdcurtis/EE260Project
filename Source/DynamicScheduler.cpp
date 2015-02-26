@@ -56,16 +56,55 @@ int DynamicScheduler::scheduleOpReady(Schedule& schedule, std::vector<LeveledDag
 	return -1;
 }
 
+void ScheduleDagByCritacalPath(Schedule& schedule, LeveledDag& dag)
+{
+
+
+	vector<ScheduleNode*> delayedList;
+	vector<ScheduleNode*> WorkingList;
+	for(unsigned int level =0 ; level < dag.Levels().size(); ++level)
+	{
+		for(unsigned int i; i< delayedList.size(); ++i) {
+			WorkingList.push_back(delayedList[i]);
+		}
+		delayedList.clear();
+
+		for(unsigned int i; i< WorkingList.size(); ++i) {
+			ScheduleNode* node =WorkingList[i];
+			if(dag.CanNodeBeDelayed(node, level)){
+				delayedList.push_back(node);
+			}
+			schedule.ScheduleNodeASAP(node);
+		}
+
+		for (unsigned int nodeIndex; nodeIndex <dag.Levels().at(level).size(); ++nodeIndex )
+		{
+			ScheduleNode* node = dag.Levels().at(level).at(nodeIndex);
+			if(dag.CanNodeBeDelayed(node, level))
+				delayedList.push_back(node);
+			else {
+				schedule.ScheduleNodeASAP(node);
+
+			}
+
+		}
+	}
+}
 int DynamicScheduler::scheduleCritPath(Schedule& schedule, std::vector<LeveledDag>& dags)
 {
 	//Order the Dags by critical path. Largest first.
+	LeveledDag* criticalPathDag =NULL;
 	CalculateCritcalPaths(schedule,dags);
 	while(dags.size() != 0)
 	{
-		for(unsigned int i =0; i< dags.size(); ++i)
+		criticalPathDag = &dags[0];
+		for(unsigned int i =1; i< dags.size(); ++i)
 		{
-			//TODO:: pick largest crit path and schedule then delete dag from list.
+			if(criticalPathDag->CriticalPathSize() < dags[i].CriticalPathSize())
+				criticalPathDag = &dags[i];
 		}
+
+		ScheduleDagByCritacalPath(schedule, *criticalPathDag);
 	}
 
 	return -1;
@@ -80,8 +119,8 @@ void DynamicScheduler::CalculateCritcalPaths(Schedule& schedule, std::vector<Lev
 			double maxAtLevel =0;
 			for(unsigned nodeIndex =0; nodeIndex < dags[i].Levels().at(level).size(); ++nodeIndex )
 			{
-				ScheduleNode n= dags[i].Levels[i]().at(level).at(nodeIndex);
-				double nodeSize = max(n.timeNeeded, schedule.GetOperationTime(n.type));
+				ScheduleNode* n= dags[i].Levels().at(level).at(nodeIndex);
+				double nodeSize = max(n->timeNeeded, schedule.GetOperationTime(n->type));
 
 				if(maxAtLevel<nodeSize)
 					maxAtLevel = nodeSize;
