@@ -22,7 +22,6 @@ struct Vertex{
 	int uniqueID;
 	Vertex(VertexType t, std :: string l, int id): type(t), label(l), portName(""), uniqueID(id) {}
 	Vertex(VertexType t, std :: string l, std :: string pN, int id): type(t), label(l), portName(pN), uniqueID(id) {}
-
 	void print()
 	{
 		switch (type)
@@ -83,19 +82,18 @@ public:
 	DagGen():dagName(""), IDs(0) {}
 	~DagGen()
 	{
-		//TODO:: THERE IS A BUG HERE!!!!!!!!
 		
-	/*	for(unsigned int i =vertices.size(); i>0; --i){
-			std::cout<< "Deleting Vertiex " << i << std:: endl;
+		for(unsigned int i =vertices.size(); i>0; --i){
+			//std::cout<< "Deleting Vertiex " << i << std:: endl;
 			delete vertices[i-1];
 		}
 		 		
 		for(unsigned int i = edges.size(); i> 0; --i){
-			std::cout<< "Deleting Edge " << i << std:: endl;
+			//std::cout<< "Deleting Edge " << i << std:: endl;
 			//if(edges[i] != NULL)
 			delete edges[i-1];
 		}
-		*/
+
 	}
 	
 	Vertex * addVertex(VertexType, std :: string );

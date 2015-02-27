@@ -9,20 +9,23 @@
 
 enum SchedulePriorty {High,Medium,Low,NotSpecified};
 
-struct ScheduleNode : public Vertex
+struct ScheduleNode
 {
+	VertexType type;
+	std :: string label;
+	std :: string portName;
+	int uniqueID;
 	std:: vector<ScheduleNode*> parents;
 	std::vector<ScheduleNode*> children;
 	double timeNeeded;
 	int timeStarted;
 	int timeEnded;
-	ScheduleNode(Vertex V): Vertex(V), parents(),children(), timeNeeded(0) {	}
+	ScheduleNode(Vertex V): type(V.type), label(V.label),portName(V.portName), uniqueID(V.uniqueID), parents(),children(), timeNeeded(0), timeStarted(-1),timeEnded(-1) {	}
 	~ScheduleNode()
 	{
-	#ifdef DEBUG_DESTRUCTOR
-		std::cout << "Calling ScheduleNode Destructor"<<std::endl;
-		std::cout << "Leaving ScheduleNode Destructor"<<std::endl;
-	#endif
+
+		//std::cout << "Calling ScheduleNode Destructor"<<std::endl;
+		//std::cout << "Leaving ScheduleNode Destructor"<<std::endl;
 	}
 	
 	

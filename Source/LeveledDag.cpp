@@ -11,19 +11,17 @@
 using namespace std;
 LeveledDag:: ~LeveledDag()
 {
-#ifdef DEBUG_DESTRUCTOR
-	std::cout << "Calling Destructor"<<std::endl;
-#endif
+
+	//std::cout << "Calling LeveledDag Destructor"<<std::endl;
 	for(unsigned int i =0 ; i< levels.size();++i)
 		for(unsigned int j=0; j< levels[i].size();++j)
 		{
-			//std:: cout << i << " " << j <<std::endl;
+//			std:: cout << i << " " << j <<std::endl;
 			delete levels[i][j];
 
 		}
-#ifdef DEBUG_DESTRUCTOR
-	std::cout << "Leaving Destructor"<<std::endl;
-#endif
+
+//	std::cout << "Leaving LeveledDag Destructor"<<std::endl;
 }
 
 LeveledDag:: LeveledDag(DagGen dag):criticalPathSize(-1), priority(NotSpecified)
@@ -101,16 +99,20 @@ bool LeveledDag:: CanNodeBeDelayed (ScheduleNode* node, int curentLevel)
 	if (myLevel< curentLevel)
 		myLevel =curentLevel;
 
+	if(node->children.size()==0)
+		return false;
 	int minChildLevel = INT_MAX;
 	for (unsigned int i = 0; i< node->children.size(); ++i) {
+
 		int childLevel = this->FindLevel(node->children[i]);
 		if (childLevel == myLevel + 1)
 			return false;
 		else if(minChildLevel > childLevel)
 			minChildLevel = childLevel;
+
 	}
 
-	return true;
+	return minChildLevel-1 > myLevel;
 }
 void LeveledDag:: print()
 {

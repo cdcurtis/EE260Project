@@ -48,14 +48,14 @@ class DynamicScheduler {
 		Chris: Operations ready, Critical Path
 		*/
 		
-		int schedule(ScheduleType, Schedule&, std::vector<LeveledDag>&);
-		int scheduleFIFO(Schedule&, std::vector<LeveledDag>&);
-		int scheduleResNeed(Schedule&, std::vector<LeveledDag>&);
-		int scheduleOpReady(Schedule&, std::vector<LeveledDag>&);
-		int scheduleCritPath(Schedule&, std::vector<LeveledDag>&);
+		int schedule(ScheduleType, Schedule&, std::vector<LeveledDag*>&);
+		int scheduleFIFO(Schedule&, std::vector<LeveledDag*>&);
+		int scheduleResNeed(Schedule&, std::vector<LeveledDag*>&);
+		int scheduleOpReady(Schedule&, std::vector<LeveledDag*>&);
+		int scheduleCritPath(Schedule&, std::vector<LeveledDag*>&);
 
 	private:
-		void CalculateCritcalPaths(Schedule&, std::vector<LeveledDag>&);
+		void CalculateCritcalPaths(Schedule&, std::vector<LeveledDag*>&);
 
 };
 

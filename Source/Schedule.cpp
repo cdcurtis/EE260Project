@@ -58,18 +58,23 @@ double Schedule:: GetOperationTime(VertexType OP)
 
 int Schedule:: FindFirstOpening(ScheduleNode* Op, int startTime)
 {
-	for(;startTime < availableModulesAtTimestep.size(); ++startTime) {
-		if(CanAddOperationStartingAtTime(Op,startTime))
+
+	for(unsigned int parent=0; parent < Op->parents.size(); ++parent){
+		if(startTime < Op->parents[parent]->timeEnded)
+			startTime =  Op->parents[parent]->timeEnded+1;
+	}
+	for(;startTime <= availableModulesAtTimestep.size(); ++startTime) {
+		if(this->CanAddOperationStartingAtTime(Op,startTime))
 			return startTime;
 	}
-	return -1;
+	return startTime;
 }
 
 void Schedule:: ScheduleNodeASAP(ScheduleNode* node)
 {
 	int startingPoint = this->FindFirstOpening(node);
-	int endingPoint = AddOperationStartingAtTime(node, startingPoint);
-	if (endingPoint == -1) {
+	int endingPoint = this->AddOperationStartingAtTime(node, startingPoint);
+	if (startingPoint == -1) {
 		cerr<<"Finding Starting Point is Not correct.\n";
 	}
 	else
@@ -108,8 +113,9 @@ bool Schedule::CanAddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 }
 int Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 {
-
-	if(!CanAddOperationStartingAtTime(OP,startingTime))
+	if(startingTime < 0)
+		return -1;
+	if(!this->CanAddOperationStartingAtTime(OP,startingTime))
 		return -1;
 
 	int OPTime = max(GetOperationTime(OP->type), OP->timeNeeded);
@@ -117,15 +123,14 @@ int Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 
 	int endTime =startingTime+OPTime;
 
-
-	if (endTime >= availableModulesAtTimestep.size())
-	{
-		for( int i=availableModulesAtTimestep.size();  i<=endTime; ++i)
-			this->CreateNewTimeStep();
-	}
+//	if (endTime >= availableModulesAtTimestep.size())
+//	{
+//		for( int i=availableModulesAtTimestep.size();  i<=endTime; ++i)
+//			this->CreateNewTimeStep();
+//	}
 
 	for(int i = startingTime; i<= endTime;++i)
-		AddOperationAtTime(OP,i);
+		this->AddOperationAtTime(OP,i);
 	return endTime;
 }
 
@@ -135,22 +140,16 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
 		return true;
 
 	//check that my parents are not also here.
-	map <ScheduleNode*, std::pair<int,int> >::iterator parentCheck;
 	for(unsigned int i=0; i< OP->parents.size(); ++i) {
-		parentCheck = nodeIndexLookup.find(OP->parents[i]);
-		if(parentCheck!= nodeIndexLookup.end()) {
-			if (parentCheck->second.first == time)
-				return false;
-		}
+		if(time<= OP->parents[i]->timeEnded)
+			return false;
 	}
 	//check that my Children are not here.
-	map <ScheduleNode*, std::pair<int,int> >::iterator childCheck;
+
 	for(unsigned int i=0; i< OP->children.size(); ++i) {
-		childCheck = nodeIndexLookup.find(OP->children[i]);
-		if(childCheck!= nodeIndexLookup.end()) {
-			if (childCheck->second.first == time)
+		if(OP ->children[i]->timeStarted >=0)
+			if (time >= OP->children[i]->timeStarted)
 				return false;
-		}
 	}
 
 	for(unsigned int i=0; i< availableModulesAtTimestep[time].size(); ++i)
@@ -213,8 +212,10 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time)
 
 bool Schedule::AddOperationAtTime(ScheduleNode* OP, int time)
 {
+
 	if(time >= availableModulesAtTimestep.size())
-		this->CreateNewTimeStep();
+			this->CreateNewTimeStep();
+	cout<< availableModulesAtTimestep.size()<<endl;
 
 	int index;
 	if(CanAddOperationAtTime(OP,time,index))
@@ -225,7 +226,7 @@ bool Schedule::AddOperationAtTime(ScheduleNode* OP, int time)
 		schduledNodes[time].push_back(OP);
 
 		nodeIndexLookup.insert(pair<ScheduleNode*,pair<int,int> >(OP,pair<int,int>(time,insertIndex)));
-		return false;
+		return true;
 	}
 	cerr<<"Cannot add Operation "<< OP->label <<" at time: "<< time<< endl;
 	return false;

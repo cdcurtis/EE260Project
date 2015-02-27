@@ -1,4 +1,4 @@
-//#define DEBUG_DESTRUCTOR
+#define DEBUG_DESTRUCTOR
 
 #include <iostream>
 #include "Headers/Device.h"
@@ -19,19 +19,21 @@ int main()
 	cout << "Starting"<<endl;
 	vector<DagGen*> startingPoint;
 	InitalizeDAGs(startingPoint);
-	//DMFB board;
-	//Schedule schedule (board);
-	//DynamicScheduler Scheduler;
+	DMFB board;
+	Schedule schedule (board);
+	DynamicScheduler Scheduler;
 
-	//vector<LeveledDag> lg;
-	startingPoint[0]->generateDotyGraph();
+	vector<LeveledDag*> lg;
+//	startingPoint[0]->generateDotyGraph();
 
 	LeveledDag LDag(*startingPoint[0]);
 			LDag.print();
-	//lg.push_back(LDag);
+	lg.push_back(&LDag);
 
-	//	Scheduler.schedule(CriticalPath, schedule,lg);
+	Scheduler.schedule(CriticalPath, schedule,lg);
 	
+	cout <<endl<<"Schedule:\n";
+	schedule.Print();
 	cout << "Ending"<<endl;
 
 	return 0;
