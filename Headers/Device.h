@@ -51,7 +51,9 @@ public:
 	void RemoveStore();
 	bool CanStore();
 	int StorageCapacity();
-	bool StoreNNodes(int n);
+	int NumStorageUsed();
+	bool IsStorageFull();
+	bool StoreNode();
 
 	void SetOutput();
 	void RemoveOutput();

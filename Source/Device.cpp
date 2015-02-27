@@ -90,12 +90,13 @@
 	bool Module:: CanStore() { return (enabledOperations & 0x10) == 16;}
 	
 	int Module:: StorageCapacity() { return numStorage; }
-	
-	bool Module :: StoreNNodes(int n)
+	int Module:: NumStorageUsed() { return usedStorage; }
+	bool Module:: IsStorageFull() { return usedStorage >= numStorage; }
+	bool Module :: StoreNode()
 	{
-		if ( n > numStorage - usedStorage)
+		if (numStorage - usedStorage == 0)
 			return false;
-		usedStorage = n;
+		usedStorage += 1;
 		return true;
 	}
 		

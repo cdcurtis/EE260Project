@@ -83,6 +83,7 @@ public:
 	 * Schedules the Node at the earliest available time.
 	 */
 	void ScheduleNodeASAP(ScheduleNode*);
+	void CreateStore(ScheduleNode*, ScheduleNode*, int);
 	void Print();
 private:
 	
