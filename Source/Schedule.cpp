@@ -60,7 +60,7 @@ int Schedule:: FindFirstOpening(ScheduleNode* Op, int startTime)
 {
 
 	for(unsigned int parent=0; parent < Op->parents.size(); ++parent){
-		if(startTime < Op->parents[parent]->timeEnded)
+		if(startTime <= Op->parents[parent]->timeEnded)
 			startTime =  Op->parents[parent]->timeEnded+1;
 	}
 	for(;startTime <= availableModulesAtTimestep.size(); ++startTime) {
@@ -121,7 +121,7 @@ int Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 	int OPTime = max(GetOperationTime(OP->type), OP->timeNeeded);
 
 
-	int endTime =startingTime+OPTime;
+	int endTime =startingTime+OPTime-1;
 
 //	if (endTime >= availableModulesAtTimestep.size())
 //	{
@@ -129,7 +129,7 @@ int Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 //			this->CreateNewTimeStep();
 //	}
 
-	for(int i = startingTime; i<= endTime;++i)
+	for(int i = startingTime; i<=endTime;++i)
 		this->AddOperationAtTime(OP,i);
 	return endTime;
 }
@@ -213,14 +213,14 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time)
 bool Schedule::AddOperationAtTime(ScheduleNode* OP, int time)
 {
 
-	if(time >= availableModulesAtTimestep.size())
+	if(time >= this->availableModulesAtTimestep.size())
 			this->CreateNewTimeStep();
-	cout<< availableModulesAtTimestep.size()<<endl;
+	cout<< this->availableModulesAtTimestep.size()<<endl;
 
 	int index;
 	if(CanAddOperationAtTime(OP,time,index))
 	{
-		availableModulesAtTimestep.erase(availableModulesAtTimestep.begin()+index);
+		availableModulesAtTimestep[time].erase(availableModulesAtTimestep[time].begin()+index);
 
 		int insertIndex = schduledNodes.size();
 		schduledNodes[time].push_back(OP);

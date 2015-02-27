@@ -20,20 +20,24 @@ int main()
 	vector<DagGen*> startingPoint;
 	InitalizeDAGs(startingPoint);
 	DMFB board;
-	Schedule schedule (board);
+	Schedule* schedule = new Schedule(board);
 	DynamicScheduler Scheduler;
 
 	vector<LeveledDag*> lg;
 //	startingPoint[0]->generateDotyGraph();
-
+for(unsigned int i=0; i < startingPoint.size(); ++i)
+{
+	cout<<i<<endl;
 	LeveledDag LDag(*startingPoint[0]);
-			LDag.print();
+	LDag.print();
 	lg.push_back(&LDag);
+
+}
 
 	Scheduler.schedule(CriticalPath, schedule,lg);
 	
 	cout <<endl<<"Schedule:\n";
-	schedule.Print();
+	schedule->Print();
 	cout << "Ending"<<endl;
 
 	return 0;
@@ -77,7 +81,7 @@ void InitalizeDAGs(vector<DagGen*>& dags)
 	dag1->addEdge(d1_Mix3,d1_Detect);
 	dag1->addEdge(d1_Detect,d1_Output);	
 	dags.push_back(dag1);
-//=============================================================================	
+//=============================================================================
 	DagGen* dag2 = new DagGen();
 	Vertex * d2_Dis1 = dag2->addVertex(DISPENSE, "D1");
 	Vertex * d2_Dis2 = dag2->addVertex(DISPENSE, "D2");

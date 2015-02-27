@@ -22,7 +22,7 @@ DynamicScheduler::~DynamicScheduler() {
 	@params		ScheduleType
 	@returns		int				status code
 	========================================================================== */
-int DynamicScheduler::schedule(ScheduleType type, Schedule& schedule,  std::vector<LeveledDag*>& dags) {
+int DynamicScheduler::schedule(ScheduleType type, Schedule* schedule,  std::vector<LeveledDag*>& dags) {
 
 
 
@@ -46,17 +46,17 @@ int DynamicScheduler::schedule(ScheduleType type, Schedule& schedule,  std::vect
 	return 0;
 }
 
-int DynamicScheduler::scheduleFIFO(Schedule& schedule, std::vector<LeveledDag*> & dags)
+int DynamicScheduler::scheduleFIFO(Schedule* schedule, std::vector<LeveledDag*> & dags)
 {
 	return -1;
 }
 
-int DynamicScheduler::scheduleOpReady(Schedule& schedule, std::vector<LeveledDag*>& dags)
+int DynamicScheduler::scheduleOpReady(Schedule* schedule, std::vector<LeveledDag*>& dags)
 {
 	return -1;
 }
 
-void ScheduleDagByCritacalPath(Schedule& schedule, LeveledDag* dag)
+void ScheduleDagByCritacalPath(Schedule* schedule, LeveledDag* dag)
 {
 	vector<ScheduleNode*> delayedList;
 	vector<ScheduleNode*> WorkingList;
@@ -72,7 +72,7 @@ void ScheduleDagByCritacalPath(Schedule& schedule, LeveledDag* dag)
 			if(dag->CanNodeBeDelayed(node, level)){
 				delayedList.push_back(node);
 			}
-			schedule.ScheduleNodeASAP(node);
+			schedule->ScheduleNodeASAP(node);
 		}
 
 		for (unsigned int nodeIndex=0; nodeIndex <dag->Levels().at(level).size(); ++nodeIndex )
@@ -81,14 +81,14 @@ void ScheduleDagByCritacalPath(Schedule& schedule, LeveledDag* dag)
 			if(dag->CanNodeBeDelayed(node, level))
 				delayedList.push_back(node);
 			else {
-				schedule.ScheduleNodeASAP(node);
+				schedule->ScheduleNodeASAP(node);
 
 			}
 
 		}
 	}
 }
-int DynamicScheduler::scheduleCritPath(Schedule& schedule, std::vector<LeveledDag*>& dags)
+int DynamicScheduler::scheduleCritPath(Schedule* schedule, std::vector<LeveledDag*>& dags)
 {
 	//Order the Dags by critical path. Largest first.
 
@@ -107,9 +107,9 @@ int DynamicScheduler::scheduleCritPath(Schedule& schedule, std::vector<LeveledDa
 		dags.erase(critPathDag);
 	}
 
-	return -1;
+	return 0;
 }
-void DynamicScheduler::CalculateCritcalPaths(Schedule& schedule, std::vector<LeveledDag*>& dags)
+void DynamicScheduler::CalculateCritcalPaths(Schedule* schedule, std::vector<LeveledDag*>& dags)
 {
 	for(unsigned int i = 0 ; i <dags.size(); ++i)
 	{
@@ -120,7 +120,7 @@ void DynamicScheduler::CalculateCritcalPaths(Schedule& schedule, std::vector<Lev
 			for(unsigned nodeIndex =0; nodeIndex < dags[i]->Levels().at(level).size(); ++nodeIndex )
 			{
 				ScheduleNode* n= dags[i]->Levels().at(level).at(nodeIndex);
-				double nodeSize = max(n->timeNeeded, schedule.GetOperationTime(n->type));
+				double nodeSize = max(n->timeNeeded, schedule->GetOperationTime(n->type));
 
 				if(maxAtLevel<nodeSize)
 					maxAtLevel = nodeSize;
@@ -131,7 +131,7 @@ void DynamicScheduler::CalculateCritcalPaths(Schedule& schedule, std::vector<Lev
 	}
 }
 
-int DynamicScheduler::scheduleResNeed(Schedule& schedule, std::vector<LeveledDag*>& dags)
+int DynamicScheduler::scheduleResNeed(Schedule* schedule, std::vector<LeveledDag*>& dags)
 {
 	return -1;
 	}
