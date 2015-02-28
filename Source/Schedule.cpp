@@ -61,7 +61,7 @@ int Schedule:: FindFirstOpening(ScheduleNode* Op, int startTime)
 	for(unsigned int parent=0; parent < Op->parents.size(); ++parent){
 
 		if(startTime <= Op->parents[parent]->timeEnded)
-			startTime =  Op->parents[parent]->timeEnded+1;
+			startTime =  Op->parents[parent]->timeEnded;
 	}
 
 
@@ -97,9 +97,64 @@ void Schedule::CreateStore(ScheduleNode* parent, ScheduleNode* child, int endtim
 
 	for(int startingPoint= parent->timeEnded+1; startingPoint <= endtime; ++startingPoint)
 	{
-		this-AddOperationAtTime(newStore,startingPoint);
+		this->AddOperationAtTime(newStore,startingPoint);
 	}
 }
+
+void Schedule:: PutNodeInSchdeule(ScheduleNode* node){
+	for(unsigned int child=0; child < node->children.size(); ++child){
+		if (node->children[child]->parents.size() > 1)
+			return ScheduleNodeToBalanceChildParents(node);
+	}
+
+	return ScheduleNodeASAP(node);
+
+}
+void Schedule::ScheduleNodeToBalanceChildParents(ScheduleNode* node){
+	int siblingMinEndtime= -1;
+
+	for(unsigned int child=0; child < node->children.size(); child++) {
+		for(unsigned int parent = 0; parent< node->children[child]->parents.size(); ++parent) {
+			ScheduleNode* sibling = node->children[child]->parents[parent];
+			if(sibling == node)
+				continue;
+			int siblingEndtime = EstimatedEndTime(sibling);
+			if(siblingEndtime < siblingMinEndtime || siblingMinEndtime == -1)
+				siblingMinEndtime = siblingEndtime;
+		}
+	}
+	int earlyStarting = this->FindFirstOpening(node);
+	int myStartingPoint = siblingMinEndtime - this->GetOperationTime(node->type);
+
+	if(earlyStarting > myStartingPoint)
+		myStartingPoint = earlyStarting;
+	if (myStartingPoint < 0)
+		myStartingPoint = 0;
+	int endTime=-1;
+	do {
+		node->timeStarted = myStartingPoint;
+		endTime = AddOperationStartingAtTime(node, myStartingPoint++);
+
+	}while (endTime == -1);
+	node->timeEnded = endTime;
+}
+
+int Schedule:: EstimatedEndTime(ScheduleNode* node)
+{
+	int maxEnd =-1;
+	for(unsigned int parent=0; parent < node->parents.size(); ++parent)
+	{
+		int parentEndTime= node->parents[parent]->timeEnded;
+		if(parentEndTime ==-1)
+			parentEndTime = EstimatedEndTime(node->parents[parent]);
+		if (parentEndTime > maxEnd)
+			maxEnd= parentEndTime;
+	}
+	if(maxEnd == -1)
+		return this->GetOperationTime(node->type);
+	return maxEnd + this->GetOperationTime(node->type);
+}
+
 void Schedule:: ScheduleNodeASAP(ScheduleNode* node)
 {
 	int startingPoint = this->FindFirstOpening(node);
@@ -171,9 +226,9 @@ int Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 	int OPTime = max(GetOperationTime(OP->type), OP->timeNeeded);
 
 
-	int endTime =startingTime+OPTime-1;
+	int endTime =startingTime+OPTime;
 
-	for(int i = startingTime; i<=endTime;++i)
+	for(int i = startingTime; i<endTime;++i)
 		this->AddOperationAtTime(OP,i);
 	return endTime;
 }
@@ -185,7 +240,7 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
 
 	//check that my parents are not also here.
 	for(unsigned int i=0; i< OP->parents.size(); ++i) {
-		if(time<= OP->parents[i]->timeEnded)
+		if(time< OP->parents[i]->timeEnded)
 			return false;
 	}
 	//check that my Children are not here.
@@ -195,7 +250,7 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
 			if (time >= OP->children[i]->timeStarted)
 				return false;
 	}
-//check for module that is already used as store.
+	//check for module that is already used as store.
 	if(OP->type == STORE) {
 		for(unsigned int i=0; i< availableModulesAtTimestep[time].size(); ++i) {
 			if(availableModulesAtTimestep[time][i].NumStorageUsed() > 0){
@@ -267,8 +322,8 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time)
 bool Schedule::AddOperationAtTime(ScheduleNode* OP, int time)
 {
 
-	if(time >= this->availableModulesAtTimestep.size())
-			this->CreateNewTimeStep();
+	while(time >= this->availableModulesAtTimestep.size())
+		this->CreateNewTimeStep();
 	int index;
 	if(CanAddOperationAtTime(OP,time,index))
 	{

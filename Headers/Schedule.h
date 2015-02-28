@@ -76,6 +76,10 @@ public:
 
 	int FindFirstOpening(ScheduleNode*, int startTime = 0);
 
+	void PutNodeInSchdeule(ScheduleNode*);
+	void ScheduleNodeToBalanceChildParents(ScheduleNode*);
+	int EstimatedEndTime(ScheduleNode*);
+
 	/*
 	 * Function SchdeuleNodeASAP
 	 * Parameters: ScheduleNode to be added.
@@ -83,6 +87,7 @@ public:
 	 * Schedules the Node at the earliest available time.
 	 */
 	void ScheduleNodeASAP(ScheduleNode*);
+
 	void CreateStore(ScheduleNode*, ScheduleNode*, int);
 	void Print();
 private:

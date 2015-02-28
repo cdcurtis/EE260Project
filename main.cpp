@@ -81,7 +81,7 @@ void InitalizeDAGs(vector<DagGen*>& dags)
 	dag1->addEdge(d1_Mix3,d1_Detect);
 	dag1->addEdge(d1_Detect,d1_Output);	
 	dags.push_back(dag1);
-/* //=============================================================================
+ //=============================================================================
 	DagGen* dag2 = new DagGen();
 	Vertex * d2_Dis1 = dag2->addVertex(DISPENSE, "D1");
 	Vertex * d2_Dis2 = dag2->addVertex(DISPENSE, "D2");
@@ -99,7 +99,7 @@ void InitalizeDAGs(vector<DagGen*>& dags)
 	dag2->addEdge(d2_Heat,d2_Output);	
 
 	dags.push_back(dag2);
-//=============================================================================	
+	/* //=============================================================================
 	DagGen* MixTree2 = new DagGen();
 
 	Vertex * mt2_Dis1 = MixTree2->addVertex(DISPENSE, "D1");
