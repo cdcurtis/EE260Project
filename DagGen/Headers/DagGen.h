@@ -80,6 +80,7 @@ public:
 	std :: vector<Vertex*> vertices;
 	std :: vector<Edge*>  edges;
 	DagGen():dagName(""), IDs(0) {}
+	DagGen(std::string);
 	~DagGen()
 	{
 		
@@ -95,7 +96,8 @@ public:
 		}
 
 	}
-	
+
+
 	Vertex * addVertex(VertexType, std :: string );
 	void removeVertex(int Vid);
 	bool isEmpty();
@@ -109,6 +111,7 @@ public:
 	
 	void generateJSON(std :: string = "");
 	void generateDotyGraph(std :: string = "");
+	void WriteToFile(std::string = "");	
 
 //  Microfluidic Architectures 
 	void generateDropletDag(std :: string fileName = "", int volume = 10, int Mtime = 3, int Stime =2);

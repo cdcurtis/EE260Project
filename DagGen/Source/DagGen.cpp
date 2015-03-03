@@ -5,6 +5,42 @@
 #include <vector>
 #include <map>
 
+using namespace std;
+
+DagGen:: DagGen(string filename)
+{
+	string line;
+	bool vertices=false;
+	bool edges = false;
+	ifstream dagFile ( filename.c_str());
+	if(dagFile.isOpen())
+	{
+		getLine(dagFile, line)
+		dagName = line;
+		while(getLine(dagFile, line))
+		{
+			if(vertices)
+			{
+				;//TODO:: create VERTEX
+			}
+			else if(edges)
+			{
+			//TODO:: create EDGE
+			}
+			if(line=="VERTICES"){
+				edges =false;
+				vertices = true;
+				}
+			else if(line == "EDGES"){
+				vertices = false;
+				edges = true;
+				}
+		}
+		dagFile.close();
+	}
+	else 
+	cerr<<"Unable to open file" << filename<<endl;
+}
 
 Vertex * DagGen :: getVertex(int id)
 {
@@ -315,6 +351,25 @@ void DagGen :: generateDotyGraph(std::string fileName)
 		out << "\t" << vertices[edges[i]->parent]->uniqueID << " -> " << vertices[edges[i]->child]->uniqueID << std::endl;
 	}
 	out << "}\n";
+	if (&out!=&std::cout)  
+   		delete(&out);
+}
+
+void DagGen:: WriteToFile(string)
+{
+	if(this->isEmpty())
+		return;
+	std:: ostream& out = (fileName != "") ? *(new std::ofstream(fileName.c_str())) : std::cout; 
+
+	out<<dagName<<endl;
+	
+	out<<"VERTICES" <<endl;
+	for(unsigned int i =0 ; i< vertices.size();++i)
+		out<< (int)vertices[i]->type << "," << vertices[i]->label<<"," <<vertices[i]->portName<< "," << vertices[i]->ID<<endl;
+	
+	out<<"EDGES" <<endl;
+	for(unsigned int i =0 ; i< edges.size();++i)
+		out<< edges[i]->parent << "," << edges[i]->child<<endl;	
 	if (&out!=&std::cout)  
    		delete(&out);
 }
