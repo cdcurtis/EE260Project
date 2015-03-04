@@ -16,15 +16,21 @@ void ParseVertex(string var, VertexType& type, string & label, string& portName,
 		return;
 	}
 	type = (VertexType)atoi(var.substr(0,comma).c_str());
+//	cout<< type<<endl;
 	var = var.substr(comma+1);
 	comma = var.find(',');
 	label =  var.substr(0,comma);
+//	cout<<label<<endl;
 
 	var = var.substr(comma+1);
 	comma = var.find(',');
-	portName =  var.substr(0,comma);
 
+	portName =  var.substr(0,comma);
+	if (comma==0)
+		portName="";
+//	cout<<portName<<endl;
 	ID  = atoi (var.substr(comma+1).c_str());
+//	cout<<ID<<endl;
 }
 void ParseEdge(string var, int & parent, int & child)
 {
@@ -46,16 +52,27 @@ DagGen:: DagGen(string filename)
 	{
 		getline(dagFile, line);
 		dagName = line;
+		cout<< line<<endl;
 		while(getline(dagFile, line))
 		{
-			if(parsingVertices)
+			cout<< line<<endl;
+			if(line=="VERTICES"){
+				parsingEdges =false;
+				parsingVertices = true;
+				}
+			else if(line == "EDGES"){
+				parsingVertices = false;
+				parsingEdges = true;
+				}
+			else if(parsingVertices)
 			{
-				VertexType vType;
-				int ID;
-				string label;
-				string portName;
+				VertexType vType=DISPENSE;
+				int ID =-1;
+				string label="";
+				string portName="";
 
 				ParseVertex(line, vType, label, portName, ID);
+				//cout<< (int)vType<<" "<< label << " "<< portName<<" "<<ID<<endl;
 				vertices.push_back(new Vertex(vType, label,portName,ID));
 			}
 			else if(parsingEdges)
@@ -67,14 +84,7 @@ DagGen:: DagGen(string filename)
 				edges.push_back(new Edge(parent,child));
 
 			}
-			if(line=="VERTICES"){
-				parsingEdges =false;
-				parsingVertices = true;
-				}
-			else if(line == "EDGES"){
-				parsingVertices = false;
-				parsingEdges = true;
-				}
+
 		}
 		dagFile.close();
 	}
@@ -382,7 +392,7 @@ void DagGen :: generateDotyGraph(std::string fileName)
 
 	for(unsigned int i = 0; i < vertices.size(); ++i){
 		//vertices[i]->print();
-		out << "\t" << vertices[i]->uniqueID << " [label = \"" << vertices[i]->label << "\"];" << std::endl;
+		out << "\t" << vertices[i]->uniqueID << " [label = \"" << vertices[i]->label<<vertices[i]->uniqueID<< "\"];" << std::endl;
 
 	}
 	for(unsigned int i = 0; i<edges.size(); ++i)

@@ -20,7 +20,11 @@ struct ScheduleNode
 	double timeNeeded;
 	int timeStarted;
 	int timeEnded;
-	ScheduleNode(Vertex V): type(V.type), label(V.label),portName(V.portName), uniqueID(V.uniqueID), parents(),children(), timeNeeded(0), timeStarted(-1),timeEnded(-1) {	}
+	ScheduleNode(Vertex* V, std::string NewLabel= ""): type(V->type), label(V->label),portName(V->portName), uniqueID(V->uniqueID), parents(),children(), timeNeeded(0), timeStarted(-1),timeEnded(-1)
+	{
+		if(NewLabel!= "")
+			this->label = NewLabel;
+	}
 	~ScheduleNode()
 	{
 
@@ -50,6 +54,7 @@ struct ScheduleNode
 class LeveledDag
 {
 private:
+	int ID;
 	double criticalPathSize;
 	SchedulePriorty priority;
 	std::vector < std:: vector <ScheduleNode*> > levels;
@@ -59,7 +64,7 @@ public:
 
 	~LeveledDag();
 	LeveledDag();
-	LeveledDag(DagGen dag);
+	LeveledDag(DagGen* dag, bool = false);
 	
 	/*
 	Function: Print

@@ -5,6 +5,7 @@
  *      Author: Chris
  */
 #include <iostream>
+#include <cstdio>
 #include <climits>
 #include  "../Headers/LeveledDag.h"
 
@@ -16,29 +17,61 @@ LeveledDag:: ~LeveledDag()
 	for(unsigned int i =0 ; i< levels.size();++i)
 		for(unsigned int j=0; j< levels[i].size();++j)
 		{
-//			std:: cout << i << " " << j <<std::endl;
+			//			std:: cout << i << " " << j <<std::endl;
 			delete levels[i][j];
 
 		}
 
-//	std::cout << "Leaving LeveledDag Destructor"<<std::endl;
+	//	std::cout << "Leaving LeveledDag Destructor"<<std::endl;
 }
 
-LeveledDag:: LeveledDag(DagGen dag):criticalPathSize(-1), priority(NotSpecified)
+LeveledDag:: LeveledDag(DagGen *dag, bool renameNode):criticalPathSize(-1), priority(NotSpecified)
 {
-
+	ID = 0;
 	std:: map<int, ScheduleNode*> ::iterator child;
 	std:: map<int, ScheduleNode*> ::iterator parent;
 
 	std:: map<int, ScheduleNode*> ScheduleNodes;
-	for(unsigned int i=0; i<dag.vertices.size(); ++i){
-
-		ScheduleNodes.insert(std::pair<int, ScheduleNode*>(dag.vertices[i]->uniqueID, new ScheduleNode(*dag.vertices[i])));
+	for(unsigned int i=0; i<dag->vertices.size(); ++i){
+		char buffer[50];
+		sprintf(buffer,"");
+		if(renameNode) {
+			Vertex* OP = dag->vertices[i];
+			switch (OP->type) {
+			case DISPENSE:
+				sprintf(buffer,"DIS:%i",OP->uniqueID);
+				break;
+			case DETECT:
+				sprintf(buffer,"DET:%i",OP->uniqueID);
+				break;
+			case MIX:
+				sprintf(buffer,"MIX:%i",OP->uniqueID);
+				break;
+			case HEAT:
+				sprintf(buffer,"HEAT:%i",OP->uniqueID);
+				break;
+			case SPLIT:
+				sprintf(buffer,"SPT:%i",OP->uniqueID);
+				break;
+			case STORE:
+				sprintf(buffer,"STR:%i",OP->uniqueID);
+				break;
+			case WASTE:
+				sprintf(buffer,"WST:%i",OP->uniqueID);
+				break;
+			case OUTPUT:
+				sprintf(buffer,"OUT:%i",OP->uniqueID);
+				break;
+			default:
+				break;
+			}
+		}
+		ScheduleNodes.insert(std::pair<int, ScheduleNode*>(dag->vertices[i]->uniqueID, new ScheduleNode(dag->vertices[i],buffer)));
 	}
-	for(unsigned int i=0; i< dag.edges.size(); ++i)
+	for(unsigned int i=0; i< dag->edges.size(); ++i)
 	{
-		child = ScheduleNodes.find(dag.edges[i]->child);
-		parent = ScheduleNodes.find(dag.edges[i]->parent);
+		child = ScheduleNodes.find(dag->edges[i]->child);
+		parent = ScheduleNodes.find(dag->edges[i]->parent);
 
 		child->second->parents.push_back(parent->second);
 		parent->second->children.push_back(child->second);

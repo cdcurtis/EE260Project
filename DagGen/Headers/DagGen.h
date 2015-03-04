@@ -85,7 +85,7 @@ public:
 	{
 		
 		for(unsigned int i =vertices.size(); i>0; --i){
-			//std::cout<< "Deleting Vertiex " << i << std:: endl;
+			std::cout<< "Deleting Vertiex " << i << std:: endl;
 			delete vertices[i-1];
 		}
 		 		

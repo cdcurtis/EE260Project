@@ -67,17 +67,16 @@ void ScheduleDagByCritacalPath(Schedule* schedule, LeveledDag* dag)
 		}
 		delayedList.clear();
 
-		for(unsigned int i=0; i< WorkingList.size(); ++i) {
-			ScheduleNode* node =WorkingList[i];
+		for(vector<ScheduleNode*>::iterator i = WorkingList.begin(); i != WorkingList.end();) {
+			ScheduleNode* node = (*i);
+			cout<< node->label<<endl;
 			if(dag->CanNodeBeDelayed(node, level)){
 				delayedList.push_back(node);
-				WorkingList[i] = WorkingList[WorkingList.size()-1];
-				WorkingList.pop_back();
+				WorkingList.erase(i);
 				continue;
 			}
 			schedule->PutNodeInSchdeule(node);
-			WorkingList[i] = WorkingList[WorkingList.size()-1];
-			WorkingList.pop_back();
+			WorkingList.erase(i);
 		}
 
 		for (unsigned int nodeIndex=0; nodeIndex <dag->Levels().at(level).size(); ++nodeIndex )

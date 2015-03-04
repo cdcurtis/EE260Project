@@ -74,7 +74,9 @@ int Schedule:: FindFirstOpening(ScheduleNode* Op, int startTime)
 void Schedule::CreateStore(ScheduleNode* parent, ScheduleNode* child, int endtime ){
 	string storeLabel = "S:" + parent->label;
 	cout << storeLabel<<endl;
-	ScheduleNode * newStore = new ScheduleNode(Vertex(STORE,storeLabel,endtime));
+	Vertex *v = new Vertex(STORE,storeLabel,endtime);
+	ScheduleNode * newStore = new ScheduleNode(v);
+	delete v;
 	newStore->parents.push_back(parent);
 	newStore->children.push_back(child);
 
@@ -102,6 +104,7 @@ void Schedule::CreateStore(ScheduleNode* parent, ScheduleNode* child, int endtim
 }
 
 void Schedule:: PutNodeInSchdeule(ScheduleNode* node){
+	cout<< node->label<<endl;
 	for(unsigned int child=0; child < node->children.size(); ++child){
 		if (node->children[child]->parents.size() > 1)
 			return ScheduleNodeToBalanceChildParents(node);
@@ -298,6 +301,7 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
 				return true;
 			}
 			break;
+		case WASTE:
 		case OUTPUT:
 			if(availableModulesAtTimestep[time][i].CanOutput()&& !isUsedAsStorage) {
 				index = i;
