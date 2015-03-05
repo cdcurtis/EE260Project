@@ -25,7 +25,7 @@ LeveledDag:: ~LeveledDag()
 	//	std::cout << "Leaving LeveledDag Destructor"<<std::endl;
 }
 
-LeveledDag:: LeveledDag(DagGen *dag, bool renameNode):criticalPathSize(-1), priority(NotSpecified)
+LeveledDag:: LeveledDag(DagGen *dag, int dagNum, bool renameNode):criticalPathSize(-1), priority(NotSpecified)
 {
 	ID = 0;
 	std:: map<int, ScheduleNode*> ::iterator child;
@@ -34,9 +34,10 @@ LeveledDag:: LeveledDag(DagGen *dag, bool renameNode):criticalPathSize(-1), prio
 	std:: map<int, ScheduleNode*> ScheduleNodes;
 	for(unsigned int i=0; i<dag->vertices.size(); ++i){
 		char buffer[50];
-		sprintf(buffer,"");
+		sprintf(buffer,"%s", string(dag->vertices[i]->label).c_str());
 		if(renameNode) {
-			Vertex* OP = dag->vertices[i];
+			sprintf(buffer,"D:%iN:%i", dagNum, dag->vertices[i]->uniqueID);
+			/*Vertex* OP = dag->vertices[i];
 			switch (OP->type) {
 			case DISPENSE:
 				sprintf(buffer,"DIS:%i",OP->uniqueID);
@@ -64,7 +65,7 @@ LeveledDag:: LeveledDag(DagGen *dag, bool renameNode):criticalPathSize(-1), prio
 				break;
 			default:
 				break;
-			}
+			}*/
 		}
 		ScheduleNodes.insert(std::pair<int, ScheduleNode*>(dag->vertices[i]->uniqueID, new ScheduleNode(dag->vertices[i],buffer)));
 	}
@@ -104,6 +105,86 @@ LeveledDag:: LeveledDag(DagGen *dag, bool renameNode):criticalPathSize(-1), prio
 				ScheduleNodes.erase(it);
 		}
 		levels.push_back(level);
+	}
+	Rebalance();
+}
+
+void LeveledDag:: DeleteNode(ScheduleNode* node)
+{
+	int level = FindLevel(node);
+
+	for(vector<ScheduleNode*>::iterator finder = levels[level].begin(); finder != levels[level].end(); ++finder)
+	{
+		if(*finder == node) {
+			levels[level].erase(finder);
+			return;
+		}
+	}
+}
+void LeveledDag:: Rebalance()
+{
+	vector<ScheduleNode*> reevaluateList;
+	for(unsigned int level =0 ; level < levels.size() ; ++level) {
+		for(vector<ScheduleNode*>::iterator node = levels[level].begin(); node != levels[level].end(); ) {
+			int minLevel = levels.size();
+			for(vector<ScheduleNode*>::iterator childNode = (*node)->children.begin() ; childNode !=(*node)->children.end(); ++childNode) {
+				if((*childNode)->type == WASTE || (*childNode)->type == OUTPUT) {
+					reevaluateList.push_back(*childNode);
+					continue;
+				}
+				int childLevel = FindLevel(*childNode);
+				if(childLevel < minLevel)
+					minLevel = childLevel;
+			}
+			if((*node)->type == WASTE || (*node)->type == OUTPUT) {
+				reevaluateList.push_back(*node);
+				++node;
+				continue;
+			}
+			else if(minLevel - 1 != level && minLevel != levels.size()) {
+
+				reevaluateList.push_back(*node);
+				levels[minLevel-1].push_back(*node);
+				levels[level].erase(node);
+			}
+			else
+			{
+				++node;
+			}
+		}
+	}
+	while(reevaluateList.size() !=0 )
+	{
+		vector<ScheduleNode*> ::iterator node = reevaluateList.begin();
+		int currentLevel = FindLevel(*node);
+		if((*node)->type ==WASTE || (*node)->type==OUTPUT){//take the next level after parent
+			int parentLevel = FindLevel((*node)->parents[0]);
+			if(parentLevel+1 != currentLevel){
+				DeleteNode(*node);
+				levels[parentLevel+1].push_back(*node);
+			}
+		}
+		else {
+
+			for(vector<ScheduleNode*> ::iterator parentNode = (*node)->parents.begin(); parentNode!= (*node)->parents.end(); ++parentNode ) {
+				int parentLevel = FindLevel(*parentNode);
+				int minLevel = levels.size();
+				for(vector<ScheduleNode*> ::iterator parentsChildNode = (*parentNode)->children.begin(); parentsChildNode!= (*parentNode)->children.end(); ++parentsChildNode ) {
+					int childLevel = FindLevel(*parentsChildNode);
+
+					if (minLevel > childLevel)
+						minLevel = childLevel;
+				}
+				if(minLevel - 1 != parentLevel) {
+					DeleteNode(*parentNode);
+					reevaluateList.push_back(*parentNode);
+					levels[minLevel-1].push_back(*parentNode);
+				}
+			}
+
+
+		}
+		reevaluateList.erase(node);
 	}
 }
 
@@ -151,7 +232,7 @@ void LeveledDag:: print()
 {
 	for(unsigned int i=0; i< levels.size(); ++i)
 	{
-		std:: cout << "Level: " << i<< ":";
+		std:: cout << "Level: " << i<< " :  " ;
 		for (unsigned int j=0; j < levels[i].size(); ++j)
 			std:: cout<< levels[i][j]->label << " ";
 		std:: cout << std::endl;

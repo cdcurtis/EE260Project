@@ -76,8 +76,8 @@ public:
 
 	int FindFirstOpening(ScheduleNode*, int startTime = 0);
 
-	void PutNodeInSchdeule(ScheduleNode*);
-	void ScheduleNodeToBalanceChildParents(ScheduleNode*);
+	void PutNodeInSchdeule(ScheduleNode*, LeveledDag* );
+	void ScheduleNodeToBalanceChildParents(ScheduleNode*, LeveledDag*);
 	int EstimatedEndTime(ScheduleNode*);
 
 	/*

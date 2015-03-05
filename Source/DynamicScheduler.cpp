@@ -58,6 +58,7 @@ int DynamicScheduler::scheduleOpReady(Schedule* schedule, std::vector<LeveledDag
 
 void ScheduleDagByCritacalPath(Schedule* schedule, LeveledDag* dag)
 {
+	dag->print();
 	vector<ScheduleNode*> delayedList;
 	vector<ScheduleNode*> WorkingList;
 	for(unsigned int level =0 ; level < dag->Levels().size(); ++level)
@@ -69,25 +70,29 @@ void ScheduleDagByCritacalPath(Schedule* schedule, LeveledDag* dag)
 
 		for(vector<ScheduleNode*>::iterator i = WorkingList.begin(); i != WorkingList.end();) {
 			ScheduleNode* node = (*i);
-			cout<< node->label<<endl;
+			cout<< node->label;
 			if(dag->CanNodeBeDelayed(node, level)){
+				cout<<" delayed "<<endl;
 				delayedList.push_back(node);
 				WorkingList.erase(i);
 				continue;
 			}
-			schedule->PutNodeInSchdeule(node);
+			cout<<"Scheduled "<<endl;
+			schedule->PutNodeInSchdeule(node,dag);
 			WorkingList.erase(i);
 		}
 
 		for (unsigned int nodeIndex=0; nodeIndex <dag->Levels().at(level).size(); ++nodeIndex )
 		{
 			ScheduleNode* node = dag->Levels().at(level).at(nodeIndex);
-			cout<< node->label<<endl;
+			cout<< node->label;
 			if(dag->CanNodeBeDelayed(node, level)) {
+				cout<<" delayed "<<endl;
 				delayedList.push_back(node);
 			}
 			else {
-				schedule->PutNodeInSchdeule(node);
+				cout<<" Scheduled "<<endl;
+				schedule->PutNodeInSchdeule(node, dag);
 			}
 		}
 	}

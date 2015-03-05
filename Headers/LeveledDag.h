@@ -49,6 +49,7 @@ struct ScheduleNode
 			
 		return true;
 	}
+
 };
 
 class LeveledDag
@@ -64,7 +65,7 @@ public:
 
 	~LeveledDag();
 	LeveledDag();
-	LeveledDag(DagGen* dag, bool = false);
+	LeveledDag(DagGen* dag,int =-1, bool = false);
 	
 	/*
 	Function: Print
@@ -77,7 +78,8 @@ public:
 	bool CanNodeBeDelayed (ScheduleNode*, int = -1);
 	double & CriticalPathSize() { return criticalPathSize; }
 	std::vector < std:: vector <ScheduleNode*> > Levels() { return levels; }
-
+	void Rebalance();
+	void DeleteNode(ScheduleNode*);
 };
 
 #endif //__LEVELEDDAG_H__

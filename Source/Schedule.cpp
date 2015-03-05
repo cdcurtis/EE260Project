@@ -73,7 +73,7 @@ int Schedule:: FindFirstOpening(ScheduleNode* Op, int startTime)
 }
 void Schedule::CreateStore(ScheduleNode* parent, ScheduleNode* child, int endtime ){
 	string storeLabel = "S:" + parent->label;
-	cout << storeLabel<<endl;
+	//cout << storeLabel<<endl;
 	Vertex *v = new Vertex(STORE,storeLabel,endtime);
 	ScheduleNode * newStore = new ScheduleNode(v);
 	delete v;
@@ -103,35 +103,57 @@ void Schedule::CreateStore(ScheduleNode* parent, ScheduleNode* child, int endtim
 	}
 }
 
-void Schedule:: PutNodeInSchdeule(ScheduleNode* node){
-	cout<< node->label<<endl;
-	for(unsigned int child=0; child < node->children.size(); ++child){
+void Schedule:: PutNodeInSchdeule(ScheduleNode* node, LeveledDag* dag){
+	/*for(unsigned int child=0; child < node->children.size(); ++child){
 		if (node->children[child]->parents.size() > 1)
 			return ScheduleNodeToBalanceChildParents(node);
-	}
+	}*/
 
-	return ScheduleNodeASAP(node);
+	return ScheduleNodeToBalanceChildParents(node, dag);
 
 }
-void Schedule::ScheduleNodeToBalanceChildParents(ScheduleNode* node){
-cout<<"Inside Balance"<<endl;
+void Schedule::ScheduleNodeToBalanceChildParents(ScheduleNode* node, LeveledDag * dag){
+	//cout<<"Inside Balance"<<endl;
 	int siblingMinEndtime= -1;
 
-	for(unsigned int child=0; child < node->children.size(); child++) {
-		for(unsigned int parent = 0; parent< node->children[child]->parents.size(); ++parent) {
-			ScheduleNode* sibling = node->children[child]->parents[parent];
-			if(sibling == node)
-				continue;
-				cout<<"Inside EstimatedEndTIme"<<endl;
-			int siblingEndtime = EstimatedEndTime(sibling);
-			cout<<"Outside EstimatedEndTIme"<<endl;
-			if(siblingEndtime < siblingMinEndtime || siblingMinEndtime == -1)
-				siblingMinEndtime = siblingEndtime;
+
+	if(node->parents.size() > 0){
+		for(unsigned int child=0; child < node->children.size(); child++) {
+			for(unsigned int parent = 0; parent< node->children[child]->parents.size(); ++parent) {
+				ScheduleNode* sibling = node->children[child]->parents[parent];
+				if(sibling == node)
+					continue;
+				//			cout<<"Inside EstimatedEndTIme"<<endl;
+				int siblingEndtime = EstimatedEndTime(sibling);
+				//		cout<<"Outside EstimatedEndTIme"<<endl;
+				if(siblingEndtime < siblingMinEndtime || siblingMinEndtime == -1)
+					siblingMinEndtime = siblingEndtime;
+			}
 		}
 	}
-	cout<<"Inside FirstOpening"<<endl;
+	else{
+		int myLevel = dag->FindLevel(node);
+		siblingMinEndtime =-1;//we are actually using this as a max here
+		if(myLevel == 0){
+			return ScheduleNodeASAP(node);
+		}
+		for(unsigned int siblingIndex = 0; siblingIndex < dag->Levels().at(myLevel).size(); ++siblingIndex  )
+		{
+			ScheduleNode* sibling =  dag->Levels().at(myLevel).at(siblingIndex);
+			if(!(*sibling == *node))
+			{
+
+				int siblingEndtime = EstimatedEndTime(sibling);
+				if(siblingEndtime > siblingMinEndtime)
+					siblingMinEndtime = siblingEndtime;
+			}
+		}
+	}
+
+
+	//	cout<<"Inside FirstOpening"<<endl;
 	int earlyStarting = this->FindFirstOpening(node);
-	cout<<"Outside FirstOpening"<<endl;
+	//	cout<<"Outside FirstOpening"<<endl;
 	int myStartingPoint = siblingMinEndtime - this->GetOperationTime(node->type);
 
 	if(earlyStarting > myStartingPoint)
@@ -141,12 +163,13 @@ cout<<"Inside Balance"<<endl;
 	int endTime=-1;
 	do {
 		node->timeStarted = myStartingPoint;
-		cout<<"Inside AddOppStarting"<<endl;
+		//	cout<<"Inside AddOppStarting"<<endl;
 		endTime = AddOperationStartingAtTime(node, myStartingPoint++);
-		cout<<"Outside AddOppStarting"<<endl;
+		//	cout<<"Outside AddOppStarting"<<endl;
 	}while (endTime == -1);
 	node->timeEnded = endTime;
-	
+
+	cout<<"Timeing: "<< node->timeStarted << "-> " << node->timeEnded <<endl;
 	//add StoresIf Necessary
 	for(unsigned int i=0; i< node->children.size(); ++i) {
 		unsigned int numParents = node->children[i]->parents.size();
@@ -155,7 +178,7 @@ cout<<"Inside Balance"<<endl;
 			for(unsigned int pIndex=0; pIndex< numParents; ++pIndex) {
 				if (node->children[i]->parents[pIndex]->timeEnded == -1);//do nothign
 				else if(node->children[i]->parents[pIndex]->timeEnded < node->timeEnded){
-					cout<<node->children[i]->parents[pIndex]->timeEnded << " " << node-> timeEnded <<endl;
+					//cout<<node->children[i]->parents[pIndex]->timeEnded << " " << node-> timeEnded <<endl;
 					CreateStore(node->children[i]->parents[pIndex], node->children[i], node->timeEnded);
 				}
 				else if (node->children[i]->parents[pIndex]->timeEnded > node->timeEnded){
@@ -168,7 +191,9 @@ cout<<"Inside Balance"<<endl;
 
 int Schedule:: EstimatedEndTime(ScheduleNode* node)
 {
-	
+
+	if(node->timeEnded != -1)
+		return node->timeEnded;
 	int maxEnd =-1;
 	for(unsigned int parent=0; parent < node->parents.size(); ++parent)
 	{
@@ -185,7 +210,7 @@ int Schedule:: EstimatedEndTime(ScheduleNode* node)
 
 void Schedule:: ScheduleNodeASAP(ScheduleNode* node)
 {
-cout<<"Inside ASAP"<<endl;
+	//cout<<"Inside ASAP"<<endl;
 	int startingPoint = this->FindFirstOpening(node);
 	int endingPoint = this->AddOperationStartingAtTime(node, startingPoint);
 
@@ -206,7 +231,7 @@ cout<<"Inside ASAP"<<endl;
 			for(unsigned int pIndex=0; pIndex< numParents; ++pIndex) {
 				if (node->children[i]->parents[pIndex]->timeEnded == -1);//do nothign
 				else if(node->children[i]->parents[pIndex]->timeEnded < node->timeEnded){
-					cout<<node->children[i]->parents[pIndex]->timeEnded << " " << node-> timeEnded <<endl;
+					//cout<<node->children[i]->parents[pIndex]->timeEnded << " " << node-> timeEnded <<endl;
 					CreateStore(node->children[i]->parents[pIndex], node->children[i], node->timeEnded);
 				}
 				else if (node->children[i]->parents[pIndex]->timeEnded > node->timeEnded){
@@ -258,9 +283,9 @@ int Schedule::AddOperationStartingAtTime(ScheduleNode* OP, int startingTime)
 	int endTime =startingTime+OPTime;
 
 	for(int i = startingTime; i<endTime;++i){
-		cout<<" addingOp at time "<< i<<endl;
+		//cout<<" addingOp at time "<< i<<endl;
 		this->AddOperationAtTime(OP,i);
-		}
+	}
 	return endTime;
 }
 
