@@ -16,7 +16,7 @@ using namespace std;
 void InitalizeDAGs(vector<DagGen*>& dags, int number);
 
 void GenerateDoty(Schedule*, string = "");
-
+string GetDagName(string N);
 int main()
 {
 	cout << "Starting"<<endl;
@@ -53,7 +53,9 @@ string GetDagName(string N)
 		cerr<<"Need to run schedul through rename Labels."<<endl;
 		return "error";
 	}
-	return N.substr(0,N.find("N"));
+	int d = N.find('D');
+	int n = N.find('N');
+	return N.substr(d,n-d);
 }
 string GetFriendlyName( string N)
 {
@@ -68,8 +70,8 @@ void GenerateDoty(Schedule* schedule, string fileName)
 {
 	map<string,string> dagColors;
 
-	string colors[] = {"0099FF","0099FF","9933CC","FF9933","FF6699","FFCCFF","CCFF66", "66CC00", "CC6600"};
-	int maxColors=9;
+	string colors[] = {"0099FF","9933CC","FF9933","FF6699","FFCCFF","CCFF66", "66CC00", "CC6600"};
+	int maxColors=8;
 	int nextColor=0;
 
 	if(schedule == NULL)
@@ -87,10 +89,12 @@ void GenerateDoty(Schedule* schedule, string fileName)
 			out<<"\t\t\t<TD";
 			string label = schedule->schduledNodes[timeStep][nodeIndex]->label;
 			string dagName = GetDagName(label);
+			//cout<<dagName<<endl;
 			string friendlyName = GetFriendlyName(label);
+
 			string dagColor = "";
 			if (dagColors.find(dagName) != dagColors.end()) {
-				map<string,string>::iterator mycolor= dagColors.find(dagName);
+				map<string,string>::iterator mycolor = dagColors.find(dagName);
 				dagColor = mycolor->second;
 			}
 			else{
@@ -124,10 +128,10 @@ void InitalizeDAGs(vector<DagGen*>& dags, int number)
 	//dags.push_back(new DagGen(buffer));
 	//dags.push_back(new DagGen("Inputs\\Remia1_256.dag"));
 	dags.push_back(new DagGen("Inputs\\Remia62_256.dag"));
-//	dags.push_back(new DagGen("Inputs\\Remia128_256.dag"));
+	//dags.push_back(new DagGen("Inputs\\Remia128_256.dag"));
 	//dags.push_back(new DagGen("Inputs\\Remia8_256.dag"));
-//	dags.push_back(new DagGen("Inputs\\Remia16_256.dag"));
-//	dags.push_back(new DagGen("Inputs\\Remia32_256.dag"));
+	//dags.push_back(new DagGen("Inputs\\Remia16_256.dag"));
+	//dags.push_back(new DagGen("Inputs\\Remia32_256.dag"));
 	//dags.push_back(new DagGen("Inputs\\Remia13_256.dag"));
 	dags.push_back(new DagGen("Inputs\\Remia71_256.dag"));
 	//dags.push_back(new DagGen("Inputs\\Remia205_256.dag"));
