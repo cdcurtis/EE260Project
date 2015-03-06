@@ -75,26 +75,26 @@
 	
 	void Module:: SetStore(int i) 
 	{ 
-		numStorage=i;
+		storageCapacity=i;
 		usedStorage=0;
 		if(! ((enabledOperations & 0x10) == 16))
 			enabledOperations +=16; 
 	}
 	void Module:: RemoveStore()
 	{
-	numStorage=0;
+	storageCapacity=0;
 	usedStorage=0;
 		if((enabledOperations & 0x10) == 16)
 			enabledOperations -=16;
 	}
-	bool Module:: CanStore() { return (enabledOperations & 0x10) == 16;}
+	bool Module:: CanStore() { return (enabledOperations & 0x10) == 16 &&  storageCapacity -usedStorage!=0;}
 	
-	int Module:: StorageCapacity() { return numStorage; }
+	int Module:: StorageCapacity() { return storageCapacity; }
 	int& Module:: NumStorageUsed() { return usedStorage; }
-	bool Module:: IsStorageFull() { return usedStorage >= numStorage; }
+	bool Module:: IsStorageFull() { return usedStorage >= storageCapacity; }
 	bool Module :: StoreNode()
 	{
-		if (numStorage - usedStorage == 0)
+		if (storageCapacity - usedStorage == 0)
 			return false;
 		usedStorage += 1;
 		return true;

@@ -15,10 +15,10 @@ public:
 	std:: vector< std::vector <ScheduleNode*> > schduledNodes;
 
 
-	Schedule(DMFB d)
+	Schedule(DMFB* d)
 	{
 		_device = d;
-		_timer = d.timer;
+		_timer = d->timer;
 		gapTolerance=5;
 	}
 	/*
@@ -83,6 +83,7 @@ public:
 	int FindFirstOpening(ScheduleNode*, int startTime = 0);
 
 	bool PutNodeInSchdeule(ScheduleNode*, LeveledDag* , int =-1);
+	bool AddStoreIfNecessary(ScheduleNode*,bool);
 	bool ScheduleNodeToBalanceChildParents(ScheduleNode*, LeveledDag*,int);
 	int EstimatedEndTime(ScheduleNode*, int);
 
@@ -102,6 +103,7 @@ public:
 	 */
 	bool CreateStore(ScheduleNode*, ScheduleNode*, int);
 	void Print();
+	void PrintRes();
 	bool isValid();
 private:
 	
@@ -109,7 +111,7 @@ private:
 	bool CanAddOperationAtTime(ScheduleNode*, int, int& );
 	bool CanAddOperationAtTime(ScheduleNode*, int);
 	bool AddOperationAtTime(ScheduleNode*, int );
-	DMFB _device;
+	DMFB* _device;
 	OperationTimer _timer;
 	int gapTolerance;
 };

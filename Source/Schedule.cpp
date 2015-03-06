@@ -5,6 +5,7 @@
  *      Author: Chris
  */
 #include <cmath>
+#include <fstream>
 #include <iostream>
 #include "../Headers/Schedule.h"
 
@@ -12,10 +13,16 @@ using namespace std;
 
 void Schedule:: CreateNewTimeStep()
 {
+	//this is a test for the hard coding value.
 	vector<Module*> temp;
-	for(unsigned int m= 0; m <_device.modules.size(); ++m)
-		temp.push_back(new Module(_device.modules[m].moduleName,_device.modules[m].enabledOperations,_device.modules[m].numStorage));
-
+	for(unsigned int m= 0; m <_device->modules.size(); ++m){
+		Module* newMod = new Module();
+		newMod->moduleName =_device->modules[m]->moduleName;
+		newMod->enabledOperations=_device->modules[m]->enabledOperations;
+		newMod->storageCapacity = _device->modules[m]->storageCapacity;
+		newMod->usedStorage = _device->modules[m]->usedStorage;
+		temp.push_back(newMod);
+	}
 	availableModulesAtTimestep.push_back(temp);
 
 	vector<ScheduleNode*> nodes;
@@ -53,8 +60,8 @@ double Schedule:: GetOperationTime(VertexType OP)
 	}
 
 	map<string, double>::iterator optime;
-	optime = _device.timer.MinTimeForOpComp.find(operation);
-	if(optime!= _device.timer.MinTimeForOpComp.end())
+	optime = _device->timer.MinTimeForOpComp.find(operation);
+	if(optime!= _device->timer.MinTimeForOpComp.end())
 		return optime->second;
 	return 1;
 }
@@ -115,7 +122,6 @@ bool Schedule::CreateStore(ScheduleNode* parent, ScheduleNode* child, int endtim
 
 	return true;
 }
-
 bool Schedule:: PutNodeInSchdeule(ScheduleNode* node, LeveledDag* dag, int startingPoint){
 	/*for(unsigned int child=0; child < node->children.size(); ++child){
 		if (node->children[child]->parents.size() > 1)
@@ -131,7 +137,7 @@ bool Schedule:: PutNodeInSchdeule(ScheduleNode* node, LeveledDag* dag, int start
 	for(unsigned int parentsIndex=0 ;parentsIndex < node->parents.size(); ++parentsIndex)
 	{
 		if(node->parents[parentsIndex]->timeEnded != node ->timeStarted){
-			cerr <<"BROKE NODE "<< node->label << " AT TIME"<< node->timeStarted <<endl << "\tParent"<<node->parents[parentsIndex]->label <<" Ends at: "<< node->parents[parentsIndex]->timeEnded <<endl;
+			//cerr <<"BROKE NODE "<< node->label << " AT TIME"<< node->timeStarted <<endl << "\tParent"<<node->parents[parentsIndex]->label <<" Ends at: "<< node->parents[parentsIndex]->timeEnded <<endl;
 			/*int gap =node->timeStarted - node->parents[parentsIndex]->timeEnded;
 			if(gap >0 && gap < this->gapTolerance ){
 				if(this->CreateStore(node->parents[parentsIndex],node,node->timeStarted))
@@ -140,12 +146,49 @@ bool Schedule:: PutNodeInSchdeule(ScheduleNode* node, LeveledDag* dag, int start
 					return false;
 			}
 			else*/
-				return false;
+			return false;
 		}
 	}
 	return true;
 
 }
+
+bool Schedule::AddStoreIfNecessary(ScheduleNode* node, bool checkParents)
+{
+	//checks logical siblings
+	for(unsigned int i=0; i< node->children.size(); ++i) {
+		unsigned int numParents = node->children[i]->parents.size();
+		if (numParents > 1)
+		{
+			for(unsigned int pIndex=0; pIndex< numParents; ++pIndex) {
+				if (node->children[i]->parents[pIndex]->timeEnded == -1)
+					continue;//do nothign
+				else if(node->children[i]->parents[pIndex]->timeEnded < node->timeEnded){
+					//cout<<node->children[i]->parents[pIndex]->timeEnded << " " << node-> timeEnded <<endl;
+					if(! CreateStore(node->children[i]->parents[pIndex], node->children[i], node->timeEnded))
+						return false;
+				}
+				else if (node->children[i]->parents[pIndex]->timeEnded > node->timeEnded){
+					if(! CreateStore(node, node->children[i], node->children[i]->parents[pIndex]->timeEnded))
+						return false;
+				}
+			}
+		}
+	}
+
+	//checks parents
+	//TODO:: this is somehting to look into later.
+	if(checkParents && false){
+		for(vector<ScheduleNode*>::iterator parent = node->parents.begin(); parent != node->parents.end(); ++parent )
+		{
+			if((*parent)->timeEnded != node->timeStarted)
+				if(! CreateStore((*parent),node,node->timeStarted))
+					return false;
+		}
+	}
+	return true;
+}
+
 bool Schedule::ScheduleNodeToBalanceChildParents(ScheduleNode* node, LeveledDag * dag, int startingPoint){
 	//cout<<"Inside Balance"<<endl;
 
@@ -207,29 +250,11 @@ bool Schedule::ScheduleNodeToBalanceChildParents(ScheduleNode* node, LeveledDag 
 	}while (endTime == -1);
 	node->timeEnded = endTime;
 
-	//cout<<"Timeing: "<< node->timeStarted << "-> " << node->timeEnded <<endl;
-	//add StoresIf Necessary
+	//cout<<"Timing: "<< node->timeStarted << "-> " << node->timeEnded <<endl;
 
-	for(unsigned int i=0; i< node->children.size(); ++i) {
-		unsigned int numParents = node->children[i]->parents.size();
-		if (numParents > 1)
-		{
-			for(unsigned int pIndex=0; pIndex< numParents; ++pIndex) {
-				if (node->children[i]->parents[pIndex]->timeEnded == -1)
-					continue;//do nothign
-				else if(node->children[i]->parents[pIndex]->timeEnded < node->timeEnded){
-					//cout<<node->children[i]->parents[pIndex]->timeEnded << " " << node-> timeEnded <<endl;
-					if(! CreateStore(node->children[i]->parents[pIndex], node->children[i], node->timeEnded))
-						return false;
-				}
-				else if (node->children[i]->parents[pIndex]->timeEnded > node->timeEnded){
-					if(! CreateStore(node, node->children[i], node->children[i]->parents[pIndex]->timeEnded))
-						return false;
-				}
-			}
-		}
-	}
-	return true;
+
+	//add StoresIf Necessary
+	return AddStoreIfNecessary(node, true);
 }
 
 int Schedule:: EstimatedEndTime(ScheduleNode* node, int startingPointOfDag)
@@ -266,26 +291,11 @@ void Schedule:: ScheduleNodeASAP(ScheduleNode* node, int StartingAt)
 	{
 		node->timeStarted = startingPoint;
 		node->timeEnded = endingPoint;
+		//cout<<"Timing: " << startingPoint << "->" << endingPoint <<endl;
 	}
 
 	//add store nodes as necessary.
-	for(unsigned int i=0; i< node->children.size(); ++i) {
-		unsigned int numParents = node->children[i]->parents.size();
-		if (numParents > 1)
-		{
-			for(unsigned int pIndex=0; pIndex< numParents; ++pIndex) {
-				if (node->children[i]->parents[pIndex]->timeEnded == -1);//do nothign
-				else if(node->children[i]->parents[pIndex]->timeEnded < node->timeEnded){
-					//cout<<node->children[i]->parents[pIndex]->timeEnded << " " << node-> timeEnded <<endl;
-					CreateStore(node->children[i]->parents[pIndex], node->children[i], node->timeEnded);
-				}
-				else if (node->children[i]->parents[pIndex]->timeEnded > node->timeEnded){
-					CreateStore(node, node->children[i], node->children[i]->parents[pIndex]->timeEnded);
-				}
-			}
-		}
-	}
-
+	this->AddStoreIfNecessary(node, false);
 }
 void Schedule::Print()
 {
@@ -311,6 +321,32 @@ void Schedule::Print()
 		}
 		cout <<endl;
 		//cout<<"\t\t Resoreces Used: "<< opsUsed + (stores/2) << "Amount Left: "<< availableModulesAtTimestep[i].size()<< endl;
+	}
+}
+
+void Schedule::PrintRes()
+{
+	int i =0;
+
+	for(vector<vector <ScheduleNode*> >::iterator timeStep = schduledNodes.begin(); timeStep != schduledNodes.end(); ++timeStep, ++i) {
+		int opsUsed =0;
+		int outUsed =0;
+		int stores=0;
+		cout<< "Time: "<< i << " ";
+		for(vector <ScheduleNode*> ::iterator node = timeStep->begin(); node != timeStep->end(); ++node) {
+			//cout << (*node)->label<< " is a ";
+			if((*node)->type ==STORE){
+				stores++;
+
+			}
+			else if ((*node) ->type==DISPENSE || (*node)->type==OUTPUT || (*node)->type==WASTE)
+				outUsed++;
+			else
+				opsUsed++;
+		}
+		int notused = availableModulesAtTimestep[i].size();
+		cout << "\n\tDIS: "<< outUsed << " Ops: " << opsUsed << " Stores: "<<stores<< "\n\tAvailable spots: "<< notused<< "Total: "<< notused+outUsed+opsUsed+(stores/2)<< endl;
+
 	}
 }
 
@@ -422,8 +458,10 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
 			}
 			break;
 		case SPLIT:
-			if(availableModulesAtTimestep[time][i]->CanSplit()&& !isUsedAsStorage)
+			if(availableModulesAtTimestep[time][i]->CanSplit()&& !isUsedAsStorage) {
+				index=i;
 				return true;
+			}
 			break;
 		case STORE:
 			if(availableModulesAtTimestep[time][i]->CanStore()) {
@@ -453,6 +491,7 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time)
 	return CanAddOperationAtTime(OP,time,trash);
 }
 
+
 bool Schedule::AddOperationAtTime(ScheduleNode* OP, int time)
 {
 
@@ -461,6 +500,7 @@ bool Schedule::AddOperationAtTime(ScheduleNode* OP, int time)
 	int index =-1;
 	if(CanAddOperationAtTime(OP,time,index))
 	{
+
 		if(index==-1)
 			return false;
 		if(OP->type==STORE)
@@ -497,13 +537,16 @@ void Schedule::RemoveScheduleNode(ScheduleNode* Op)
 	if(Op->timeStarted ==-1)
 		return;
 	//cout<< "Removing " <<Op->label<<endl;
+
 	int startingTime = Op->timeStarted;
 	int endingTime = Op->timeEnded;
 	for(int i = startingTime; i < endingTime; ++i)
 	{
 		int nodeIndex = this->FindScheduleNode(Op,i);
-		if(!(RemoveOperatationAt(i,nodeIndex)))
-			cerr<<"Error Removing " << Op->label <<" at " << i<<endl;
+		if(!(RemoveOperatationAt(i,nodeIndex))){
+			if(Op->type != STORE)
+				cerr<<"Error Removing " << Op->label <<" at " << i<<endl;
+		}
 	}
 	Op->timeEnded=-1;
 	Op->timeStarted =-1;
@@ -560,6 +603,7 @@ int Schedule::FindScheduleNode(ScheduleNode* Op, int timeStep)
 
 void Schedule::ReplaceModule(ScheduleNode* node,int time)
 {
+	bool createNewMod=false;
 
 	switch (node->type) {
 	case DISPENSE:
@@ -575,18 +619,26 @@ void Schedule::ReplaceModule(ScheduleNode* node,int time)
 		break;
 	case STORE:
 		for(unsigned int i = 0; i< availableModulesAtTimestep[time].size(); ++i) {
-			if(availableModulesAtTimestep[time][i]->NumStorageUsed() > 0){
-				availableModulesAtTimestep[time][i]->NumStorageUsed()-=1;
+			if(availableModulesAtTimestep[time][i]->usedStorage > 0){
+				availableModulesAtTimestep[time][i]->usedStorage= availableModulesAtTimestep[time][i]->storageCapacity -1;
 				return;
 			}
 		}
-		availableModulesAtTimestep[time].push_back(new Module("WorkerModule",0x1F,2));
-		availableModulesAtTimestep[time][availableModulesAtTimestep.size()-1]->StoreNode();
+		createNewMod = true;
 		break;
 	default:
 		break;
 	}
 
+
+	if(createNewMod){
+		Module* newMod = new Module();
+		newMod->moduleName = "WorkerNode";
+		newMod->enabledOperations = 0x1F;
+		newMod->storageCapacity = 2;
+		newMod->usedStorage= 1;
+		availableModulesAtTimestep[time].push_back(newMod);
+	}
 }
 
 

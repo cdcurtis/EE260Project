@@ -20,12 +20,12 @@ private:
 public:
 	std:: string moduleName;
 	unsigned char enabledOperations;
-	int numStorage;
+	int storageCapacity;
 	int usedStorage;
 
-	Module(const Module& m ): moduleName(m.moduleName), enabledOperations(m.enabledOperations), numStorage(m.enabledOperations), usedStorage(m.usedStorage) {}
-	Module() : moduleName(""), enabledOperations(0), numStorage(0), usedStorage(0){}
-	Module(std:: string n, unsigned char Ops, int storage): moduleName(n), enabledOperations(Ops), numStorage(storage), usedStorage(0) {}
+	Module(const Module& m ): moduleName(m.moduleName), enabledOperations(m.enabledOperations), storageCapacity(m.enabledOperations), usedStorage(m.usedStorage) {}
+	Module() : moduleName(""), enabledOperations(0), storageCapacity(0), usedStorage(0){}
+	Module(std:: string n, unsigned char Ops, int storage): moduleName(n), enabledOperations(Ops), storageCapacity(storage), usedStorage(0) {}
 
 	std:: string GetName();
 	void SetName( const std::string & name);
@@ -69,15 +69,27 @@ class DMFB
 public:
 	~DMFB()
 	{
-
+		for(unsigned int i=0; i<modules.size() ;++i)
+			delete modules[i];
 	}
 	DMFB()
 	{
-		for(int i=0; i<8 ;++i)
-			modules.push_back(Module("WorkerModule",0x1F,2));
-
-		for(int i=0; i<4 ;++i)
-			modules.push_back(Module("Dispense/output",0x60,0));
+		for(int i=0; i<8 ;++i){
+			Module* newMod = new Module();
+			newMod ->moduleName ="Worker Node";
+			newMod->enabledOperations=0x1f;
+			newMod->storageCapacity = 2;
+			newMod->usedStorage=0;
+			modules.push_back(newMod);
+		}
+		for(int i=0; i<4 ;++i){
+			Module* newMod = new Module();
+			newMod ->moduleName ="Dispense/Ouput";
+			newMod->enabledOperations=0x60;
+			newMod->storageCapacity = 0;
+			newMod->usedStorage=0;
+			modules.push_back(newMod);
+		}
 
 		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("dispense",1));
 		timer.MinTimeForOpComp.insert(std::pair<std::string,int>("detect",5));
@@ -89,8 +101,8 @@ public:
 
 }
 	OperationTimer timer;
-	std::vector<Module> modules;
-	std::vector<Module> Modules() { return modules; }
+	std::vector<Module*> modules;
+	std::vector<Module*>& Modules() { return modules; }
 };
 
 #endif //__DEVICE_H__

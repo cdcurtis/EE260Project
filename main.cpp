@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <cstdio>
+#include <cstdlib>
+#include <time.h>
 #include "Headers/Device.h"
 #include "Headers/Schedule.h"
 #include "Headers/DynamicScheduler.h"
@@ -12,54 +14,148 @@
 
 using namespace std;
 
-
+void GenerateFullDAGList(vector<DagGen*>& dags, int number);
 void InitalizeDAGs(vector<DagGen*>& dags, int number);
 
-void GenerateGraphic(Schedule*, string = "");
+void GenerateGraphic(Schedule*, string = "",bool colorOP = false);
 string GetDagName(string N);
 int main()
 {
+	srand(time(NULL));
 	vector<DagGen*> startingPoint;
-	InitalizeDAGs(startingPoint,256);
-	DMFB board;
-	Schedule* schedule = new Schedule(board);
+	vector<DagGen*> FullDagList;
+
+	DMFB* board = new DMFB();
+	Schedule* CritscheduleStatic = new Schedule(board);
+	Schedule* CritscheduleDynamic = new Schedule(board);
+
+
 	Schedule* FIFOschedule = new Schedule(board);
 	DynamicScheduler Scheduler;
 
-	vector<LeveledDag*> lg;
+	vector<LeveledDag*> CritPathStaticLEVELDAGS;
+	vector<LeveledDag*> CritPathDynamicLEVELDAGS;
+
+
 	vector<LeveledDag*> lg2;
 
 
-	//	startingPoint[0]->generateDotyGraph();
+	InitalizeDAGs(startingPoint,256);
+	GenerateFullDAGList(FullDagList,256);
+	int dagCounter=0;
 	for(unsigned int i=0; i < startingPoint.size(); ++i)
 	{
 		char buffer[20];
 		sprintf(buffer,"%i",i);
 		//	cout<<i<<endl;
-		LeveledDag* LDag= new LeveledDag(startingPoint[i],buffer,i,i,i,true);
+		LeveledDag* LDag= new LeveledDag(startingPoint[i],buffer,i,i,dagCounter,true);
+		LeveledDag* LDag2= new LeveledDag(startingPoint[i],buffer,i,i,dagCounter,true);
 
-		LeveledDag* LDag2= new LeveledDag(startingPoint[i],buffer,i,i,i,true);
-		lg.push_back(LDag);
-		lg2.push_back(LDag2);
 
+		CritPathStaticLEVELDAGS.push_back(LDag);
+		CritPathDynamicLEVELDAGS.push_back(LDag2);
+		dagCounter++;
 	}
-	//startingPoint[0]->generateDotyGraph("DAG62.dot");
-	//startingPoint[1]->generateDotyGraph("DAG72.dot");
 
-	Scheduler.schedule(CriticalPath, schedule,lg);
-	//Scheduler.schedule(FIFO,FIFOschedule,lg2);
+	//static
+	Scheduler.schedule(CriticalPath, CritscheduleStatic,CritPathStaticLEVELDAGS);
+	Scheduler.schedule(CriticalPath,CritscheduleDynamic,CritPathDynamicLEVELDAGS);
 
-	if(schedule->isValid())
+	GenerateGraphic(CritscheduleDynamic, "CritDagDynamicRd1.html");
+	GenerateGraphic(CritscheduleStatic, "CritDagStaticRd1.html");
+
+	vector<LeveledDag*> FullList;
+	vector<LeveledDag*> FullListDup;
+
+	for(unsigned int i=0; i < FullDagList.size(); ++i)
+	{
+		char buffer[20];
+		sprintf(buffer,"%i",i);
+		LeveledDag* LDag= new LeveledDag(FullDagList[i],buffer,i,i,dagCounter,true);
+		LeveledDag* LDagDup= new LeveledDag(FullDagList[i],buffer,i,i,dagCounter,true);
+
+		FullList.push_back(LDag);
+		FullListDup.push_back(LDagDup);
+		dagCounter++;
+	}
+
+	unsigned int timeLimit = CritscheduleDynamic->schduledNodes.size();
+	vector<int> dagstoberun;
+
+	unsigned int StaticEndtime;
+	//add dag dynamically.
+	for(unsigned int timestep = 1; timestep<timeLimit; ++timestep )
+	{
+		double prob = (double)rand()/(double)RAND_MAX;
+		//		cout<<prob <<endl;
+		if ( prob >= .85){
+			int dagNum = rand() % FullDagList.size();
+			cout<< "Adding Dag at time: "<< timestep<<endl;
+			Scheduler.ScheduleDag(CritscheduleDynamic,FullList[dagNum],timestep);
+			dagstoberun.push_back(dagNum);
+		}
+	}
+	//	secondRoundofStaticDags
+
+	unsigned int StartingPoint = timeLimit;
+
+	for(unsigned int i = 0 ; i < dagstoberun.size(); ++i)
+	{
+		cout<<dagstoberun[i]<<endl;
+		Scheduler.ScheduleDag(CritscheduleStatic,FullListDup[dagstoberun[i]],StartingPoint);
+	}
+	GenerateGraphic(CritscheduleDynamic, "CritDagDynamicRd2.html");
+	GenerateGraphic(CritscheduleStatic, "CritDagStaticRd2.html");
+
+
+	if(CritscheduleStatic->isValid())
+		cout<<"Valid"<<endl;
+	else
+		cout<<"INVALID"<<endl;
+	if(CritscheduleDynamic->isValid())
 		cout<<"Valid"<<endl;
 	else
 		cout<<"INVALID"<<endl;
 
-	GenerateGraphic(schedule, "Schedule.html");
-	GenerateGraphic(FIFOschedule,"FIFOSchedule.html");
-	//GenerateDoty(schedule);
 
+	cout<<"IT IS FINISHED!"<<endl;
 	return 0;
 }
+void GenerateFullDAGList(vector<DagGen*>& dags, int number)
+{
+	string PathPrefix = "Inputs\\Remia";
+	string PathPosFix = "_256.dag";
+	char buffer[50];
+	for(int i =1; i< number; ++i) {
+		sprintf(buffer,"Inputs\\Remia%i_256.dag",i);
+		dags.push_back(new DagGen(buffer));
+	}
+}
+
+void InitalizeDAGs(vector<DagGen*>& dags, int number)
+{
+	string PathPrefix = "Inputs\\Remia";
+	string PathPosFix = "_256.dag";
+	char buffer[50];
+	//int i=62;
+	//for(int i =1; i< number; ++i) {
+	//	sprintf(buffer,"Inputs\\Remia%i_256.dag",i);
+	//dags.push_back(new DagGen(buffer));
+
+	dags.push_back(new DagGen("Inputs\\Remia1_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia62_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia128_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia8_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia16_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia32_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia13_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia71_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia205_256.dag"));
+
+	//	}
+}
+
+
 string GetDagName(string N)
 {
 	if (N.find("N") ==-1)
@@ -80,7 +176,27 @@ string GetFriendlyName( string N)
 	}
 	return "Node_" + N.substr(N.find("N")+2);
 }
-void GenerateGraphic(Schedule* schedule, string fileName)
+string GetOpName(VertexType type)
+{
+	switch (type) {
+
+	case DETECT:
+	case HEAT:
+	case MIX:
+	case SPLIT:
+		return "SPLIT";
+	case STORE:
+		return "STORE";
+	case OUTPUT:
+	case WASTE:
+	case DISPENSE:
+		return "OUTPUT";
+
+	default:
+		return "UNKNOWN";
+	}
+}
+void GenerateGraphic(Schedule* schedule, string fileName,bool colorOP)
 {
 	map<string,string> dagColors;
 
@@ -107,16 +223,30 @@ void GenerateGraphic(Schedule* schedule, string fileName)
 			string friendlyName = GetFriendlyName(label);
 
 			string dagColor = "";
-			if (dagColors.find(dagName) != dagColors.end()) {
-				map<string,string>::iterator mycolor = dagColors.find(dagName);
-				dagColor = mycolor->second;
+			if(!colorOP)
+			{
+				if (dagColors.find(dagName) != dagColors.end()) {
+					map<string,string>::iterator mycolor = dagColors.find(dagName);
+					dagColor = mycolor->second;
+				}
+				else{
+					dagColor = colors[(nextColor++ % maxColors)];
+					dagColors.insert(pair<string,string>(dagName, dagColor));
+
+				}
 			}
 			else{
-				dagColor = colors[(nextColor++ % maxColors)];
-				dagColors.insert(pair<string,string>(dagName, dagColor));
+				string opName = GetOpName (schedule->schduledNodes[timeStep][nodeIndex]->type);
+				if (dagColors.find(opName) != dagColors.end()) {
+					map<string,string>::iterator mycolor = dagColors.find(opName);
+					dagColor = mycolor->second;
+				}
+				else{
+					dagColor = colors[(nextColor++ % maxColors)];
+					dagColors.insert(pair<string,string>(opName, dagColor));
 
+				}
 			}
-
 			out<<" BGCOLOR=\""<< dagColor << "\">" << label << "</TD>"<<endl;
 
 		}
@@ -131,26 +261,5 @@ void GenerateGraphic(Schedule* schedule, string fileName)
 }
 
 
-void InitalizeDAGs(vector<DagGen*>& dags, int number)
-{
-	string PathPrefix = "Inputs\\Remia";
-	string PathPosFix = "_256.dag";
-	char buffer[50];
-	//int i=62;
-	//for(int i =1; i< number; ++i) {
-	//	sprintf(buffer,"Inputs\\Remia%i_256.dag",i);
-	//dags.push_back(new DagGen(buffer));
 
-	dags.push_back(new DagGen("Inputs\\Remia1_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia62_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia128_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia8_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia16_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia32_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia13_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia71_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia205_256.dag"));
-
-	//	}
-}
 
