@@ -52,10 +52,10 @@ DagGen:: DagGen(string filename)
 	{
 		getline(dagFile, line);
 		dagName = line;
-		cout<< line<<endl;
+		//cout<< line<<endl;
 		while(getline(dagFile, line))
 		{
-			cout<< line<<endl;
+			//cout<< line<<endl;
 			if(line=="VERTICES"){
 				parsingEdges =false;
 				parsingVertices = true;

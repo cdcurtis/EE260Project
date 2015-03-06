@@ -51,7 +51,7 @@ public:
 	void RemoveStore();
 	bool CanStore();
 	int StorageCapacity();
-	int NumStorageUsed();
+	int& NumStorageUsed();
 	bool IsStorageFull();
 	bool StoreNode();
 
@@ -70,7 +70,7 @@ public:
 	}
 	DMFB()
 	{
-		for(int i=0; i<4 ;++i)
+		for(int i=0; i<8 ;++i)
 			modules.push_back(Module("WorkerModule",0x1F,2));
 
 		for(int i=0; i<4 ;++i)

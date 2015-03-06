@@ -55,6 +55,9 @@ class DynamicScheduler {
 		int scheduleCritPath(Schedule*, std::vector<LeveledDag*>&);
 
 	private:
+		void ScheduleDag(Schedule* , LeveledDag*, int =-1);
+		void RipUpNode(Schedule*,ScheduleNode*);
+		void RipUpDagAndReScheduleAt(Schedule* , LeveledDag*, int);
 		void CalculateCritcalPaths(Schedule*, std::vector<LeveledDag*>&);
 
 };

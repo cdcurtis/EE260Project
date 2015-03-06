@@ -90,7 +90,7 @@
 	bool Module:: CanStore() { return (enabledOperations & 0x10) == 16;}
 	
 	int Module:: StorageCapacity() { return numStorage; }
-	int Module:: NumStorageUsed() { return usedStorage; }
+	int& Module:: NumStorageUsed() { return usedStorage; }
 	bool Module:: IsStorageFull() { return usedStorage >= numStorage; }
 	bool Module :: StoreNode()
 	{

@@ -14,14 +14,12 @@ public:
 	std:: vector< std::vector <Module> > availableModulesAtTimestep;
 	std:: vector< std::vector <ScheduleNode*> > schduledNodes;
 
-	//takes a ScheduleNode and return the 2D index where it appears in schduledNodes
-	std::map <ScheduleNode*, std::pair<int,int> > nodeIndexLookup;
-
 
 	Schedule(DMFB d)
 	{
 		_device = d;
 		_timer = d.timer;
+		gapTolerance=5;
 	}
 	/*
 		Function: CreateNewTimeStep
@@ -53,13 +51,21 @@ public:
 	*/
 	int AddOperationStartingAtTime(ScheduleNode*, int);
 
+	void RemoveScheduleNode(ScheduleNode* Op);
 	/*
 		Function: RemoveOperationAt
 		Parameter: TimeStep, NodeIndex
 		Return: true if successfully removes operation, false if an error occurred. 
 		
 	*/
-	bool RemoveOperatationAt(unsigned int,unsigned int);
+	bool RemoveOperatationAt(unsigned int, unsigned int);
+
+	/*
+	 *  Function:  FindScheduleNode
+	 *  Parameters:Schedule node to be found
+	 *  Return: the node index at the specified timestep. Otherwise -1;
+	 */
+	int FindScheduleNode(ScheduleNode* Op, int);
 	
 	/*
 	 Function: GetOperationTime
@@ -76,9 +82,9 @@ public:
 
 	int FindFirstOpening(ScheduleNode*, int startTime = 0);
 
-	void PutNodeInSchdeule(ScheduleNode*, LeveledDag* );
-	void ScheduleNodeToBalanceChildParents(ScheduleNode*, LeveledDag*);
-	int EstimatedEndTime(ScheduleNode*);
+	bool PutNodeInSchdeule(ScheduleNode*, LeveledDag* , int =-1);
+	bool ScheduleNodeToBalanceChildParents(ScheduleNode*, LeveledDag*,int);
+	int EstimatedEndTime(ScheduleNode*, int);
 
 	/*
 	 * Function SchdeuleNodeASAP
@@ -86,19 +92,26 @@ public:
 	 *
 	 * Schedules the Node at the earliest available time.
 	 */
-	void ScheduleNodeASAP(ScheduleNode*);
-
-	void CreateStore(ScheduleNode*, ScheduleNode*, int);
+	void ScheduleNodeASAP(ScheduleNode*, int);
+	/*
+	 * Function: Create Store
+	 * Parameters Parent, child, Endtime
+	 *
+	 * creates a dynamic store between parent adn child.
+	 * if store cannot schedule Roll Back Dag and Reschedule.
+	 */
+	bool CreateStore(ScheduleNode*, ScheduleNode*, int);
 	void Print();
+	bool isValid();
 private:
 	
 	void ReplaceModule(ScheduleNode*, int);
 	bool CanAddOperationAtTime(ScheduleNode*, int, int& );
 	bool CanAddOperationAtTime(ScheduleNode*, int);
 	bool AddOperationAtTime(ScheduleNode*, int );
-
 	DMFB _device;
 	OperationTimer _timer;
+	int gapTolerance;
 };
 
 #endif // __SCHEDULE_H__

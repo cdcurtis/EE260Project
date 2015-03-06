@@ -15,33 +15,47 @@ using namespace std;
 
 void InitalizeDAGs(vector<DagGen*>& dags, int number);
 
-void GenerateDoty(Schedule*, string = "");
+void GenerateGraphic(Schedule*, string = "");
 string GetDagName(string N);
 int main()
 {
-	cout << "Starting"<<endl;
 	vector<DagGen*> startingPoint;
 	InitalizeDAGs(startingPoint,256);
 	DMFB board;
 	Schedule* schedule = new Schedule(board);
+	Schedule* FIFOschedule = new Schedule(board);
 	DynamicScheduler Scheduler;
 
 	vector<LeveledDag*> lg;
+	vector<LeveledDag*> lg2;
+
+
 	//	startingPoint[0]->generateDotyGraph();
 	for(unsigned int i=0; i < startingPoint.size(); ++i)
 	{
+		char buffer[20];
+		sprintf(buffer,"%i",i);
 		//	cout<<i<<endl;
-		LeveledDag* LDag= new LeveledDag(startingPoint[i],i,true);
-		//	startingPoint[0]->generateDotyGraph("Test.dot");
-		//LDag->print();
+		LeveledDag* LDag= new LeveledDag(startingPoint[i],buffer,i,i,i,true);
+
+		LeveledDag* LDag2= new LeveledDag(startingPoint[i],buffer,i,i,i,true);
 		lg.push_back(LDag);
+		lg2.push_back(LDag2);
 
 	}
+	//startingPoint[0]->generateDotyGraph("DAG62.dot");
+	//startingPoint[1]->generateDotyGraph("DAG72.dot");
 
 	Scheduler.schedule(CriticalPath, schedule,lg);
+	//Scheduler.schedule(FIFO,FIFOschedule,lg2);
 
-	schedule->Print();
-	GenerateDoty(schedule, "Schedule.html");
+	/*if(schedule->isValid())
+		cout<<"Valid"<<endl;
+	else
+		cout<<"INVALID"<<endl;
+*/
+	GenerateGraphic(schedule, "Schedule.html");
+	GenerateGraphic(FIFOschedule,"FIFOSchedule.html");
 	//GenerateDoty(schedule);
 
 	return 0;
@@ -66,12 +80,12 @@ string GetFriendlyName( string N)
 	}
 	return "Node_" + N.substr(N.find("N")+2);
 }
-void GenerateDoty(Schedule* schedule, string fileName)
+void GenerateGraphic(Schedule* schedule, string fileName)
 {
 	map<string,string> dagColors;
 
-	string colors[] = {"0099FF","9933CC","FF9933","FF6699","FFCCFF","CCFF66", "66CC00", "CC6600"};
-	int maxColors=8;
+	string colors[] = {"0099FF","9933CC","FF9933","FF6699","FFCCFF","CCFF66", "66CC00", "CC6600","B35F5F","60C1D9", "99DD22", "F69C42","F642DB","AC52E9","A2E16A"};
+	int maxColors=15;
 	int nextColor=0;
 
 	if(schedule == NULL)
@@ -126,15 +140,16 @@ void InitalizeDAGs(vector<DagGen*>& dags, int number)
 	//for(int i =1; i< number; ++i) {
 	//	sprintf(buffer,"Inputs\\Remia%i_256.dag",i);
 	//dags.push_back(new DagGen(buffer));
-	//dags.push_back(new DagGen("Inputs\\Remia1_256.dag"));
+
+	dags.push_back(new DagGen("Inputs\\Remia1_256.dag"));
 	dags.push_back(new DagGen("Inputs\\Remia62_256.dag"));
-	//dags.push_back(new DagGen("Inputs\\Remia128_256.dag"));
-	//dags.push_back(new DagGen("Inputs\\Remia8_256.dag"));
-	//dags.push_back(new DagGen("Inputs\\Remia16_256.dag"));
-	//dags.push_back(new DagGen("Inputs\\Remia32_256.dag"));
-	//dags.push_back(new DagGen("Inputs\\Remia13_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia128_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia8_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia16_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia32_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia13_256.dag"));
 	dags.push_back(new DagGen("Inputs\\Remia71_256.dag"));
-	//dags.push_back(new DagGen("Inputs\\Remia205_256.dag"));
+	dags.push_back(new DagGen("Inputs\\Remia205_256.dag"));
 
 	//	}
 }

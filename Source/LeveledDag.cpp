@@ -25,8 +25,11 @@ LeveledDag:: ~LeveledDag()
 	//	std::cout << "Leaving LeveledDag Destructor"<<std::endl;
 }
 
-LeveledDag:: LeveledDag(DagGen *dag, int dagNum, bool renameNode):criticalPathSize(-1), priority(NotSpecified)
+LeveledDag:: LeveledDag(DagGen *dag, std::string nme,int timeStarted, int deadline, int dagNum, bool renameNode):criticalPathSize(-1), priority(NotSpecified)
 {
+	this->name = nme;
+	this->startingAt = timeStarted;
+	this->Deadline = deadline;
 	ID = 0;
 	std:: map<int, ScheduleNode*> ::iterator child;
 	std:: map<int, ScheduleNode*> ::iterator parent;
@@ -37,35 +40,35 @@ LeveledDag:: LeveledDag(DagGen *dag, int dagNum, bool renameNode):criticalPathSi
 		sprintf(buffer,"%s", string(dag->vertices[i]->label).c_str());
 		if(renameNode) {
 			sprintf(buffer,"D:%iN:%i", dagNum, dag->vertices[i]->uniqueID);
-			/*Vertex* OP = dag->vertices[i];
+			Vertex* OP = dag->vertices[i];
 			switch (OP->type) {
 			case DISPENSE:
-				sprintf(buffer,"DIS:%i",OP->uniqueID);
+				sprintf(buffer,"D:%iN:DIS:%i",dagNum, dag->vertices[i]->uniqueID);
 				break;
 			case DETECT:
-				sprintf(buffer,"DET:%i",OP->uniqueID);
+				sprintf(buffer,"D:%iN:DET:%i",dagNum, dag->vertices[i]->uniqueID);
 				break;
 			case MIX:
-				sprintf(buffer,"MIX:%i",OP->uniqueID);
+				sprintf(buffer,"D:%iN:MIX:%i",dagNum, dag->vertices[i]->uniqueID);
 				break;
 			case HEAT:
-				sprintf(buffer,"HEAT:%i",OP->uniqueID);
+				sprintf(buffer,"D:%iN:HEAT:%i",dagNum, dag->vertices[i]->uniqueID);
 				break;
 			case SPLIT:
-				sprintf(buffer,"SPT:%i",OP->uniqueID);
+				sprintf(buffer,"D:%iN:SPT:%i",dagNum, dag->vertices[i]->uniqueID);
 				break;
 			case STORE:
-				sprintf(buffer,"STR:%i",OP->uniqueID);
+				sprintf(buffer,"D:%iN:STR:%i",dagNum, dag->vertices[i]->uniqueID);
 				break;
 			case WASTE:
-				sprintf(buffer,"WST:%i",OP->uniqueID);
+				sprintf(buffer,"D:%iN:WST:%i",dagNum, dag->vertices[i]->uniqueID);
 				break;
 			case OUTPUT:
-				sprintf(buffer,"OUT:%i",OP->uniqueID);
+				sprintf(buffer,"D:%iN:OUT:%i",dagNum, dag->vertices[i]->uniqueID);
 				break;
 			default:
 				break;
-			}*/
+			}
 		}
 		ScheduleNodes.insert(std::pair<int, ScheduleNode*>(dag->vertices[i]->uniqueID, new ScheduleNode(dag->vertices[i],buffer)));
 	}

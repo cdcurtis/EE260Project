@@ -55,6 +55,9 @@ struct ScheduleNode
 class LeveledDag
 {
 private:
+	std::string name;
+	int startingAt;
+	int Deadline;
 	int ID;
 	double criticalPathSize;
 	SchedulePriorty priority;
@@ -65,7 +68,7 @@ public:
 
 	~LeveledDag();
 	LeveledDag();
-	LeveledDag(DagGen* dag,int =-1, bool = false);
+	LeveledDag(DagGen* dag,std::string name,int,int,int =-1, bool = false);
 	
 	/*
 	Function: Print
@@ -80,6 +83,8 @@ public:
 	std::vector < std:: vector <ScheduleNode*> > Levels() { return levels; }
 	void Rebalance();
 	void DeleteNode(ScheduleNode*);
+	std::string& Name() { return name; }
+	int& StartingAt() {return startingAt;}
 };
 
 #endif //__LEVELEDDAG_H__
