@@ -49,11 +49,11 @@ int main()
 	Scheduler.schedule(CriticalPath, schedule,lg);
 	//Scheduler.schedule(FIFO,FIFOschedule,lg2);
 
-	/*if(schedule->isValid())
+	if(schedule->isValid())
 		cout<<"Valid"<<endl;
 	else
 		cout<<"INVALID"<<endl;
-*/
+
 	GenerateGraphic(schedule, "Schedule.html");
 	GenerateGraphic(FIFOschedule,"FIFOSchedule.html");
 	//GenerateDoty(schedule);

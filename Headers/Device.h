@@ -15,12 +15,15 @@ struct OperationTimer
 class Module
 {
 private:
+
+
+public:
 	std:: string moduleName;
 	unsigned char enabledOperations;
 	int numStorage;
 	int usedStorage;
 
-public:
+	Module(const Module& m ): moduleName(m.moduleName), enabledOperations(m.enabledOperations), numStorage(m.enabledOperations), usedStorage(m.usedStorage) {}
 	Module() : moduleName(""), enabledOperations(0), numStorage(0), usedStorage(0){}
 	Module(std:: string n, unsigned char Ops, int storage): moduleName(n), enabledOperations(Ops), numStorage(storage), usedStorage(0) {}
 

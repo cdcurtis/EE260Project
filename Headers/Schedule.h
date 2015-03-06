@@ -11,7 +11,7 @@
 struct Schedule
 {
 public:
-	std:: vector< std::vector <Module> > availableModulesAtTimestep;
+	std:: vector< std::vector <Module*> > availableModulesAtTimestep;
 	std:: vector< std::vector <ScheduleNode*> > schduledNodes;
 
 

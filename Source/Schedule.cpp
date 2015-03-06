@@ -12,7 +12,10 @@ using namespace std;
 
 void Schedule:: CreateNewTimeStep()
 {
-	vector<Module> temp = _device.modules;
+	vector<Module*> temp;
+	for(unsigned int m= 0; m <_device.modules.size(); ++m)
+		temp.push_back(new Module(_device.modules[m].moduleName,_device.modules[m].enabledOperations,_device.modules[m].numStorage));
+
 	availableModulesAtTimestep.push_back(temp);
 
 	vector<ScheduleNode*> nodes;
@@ -129,14 +132,14 @@ bool Schedule:: PutNodeInSchdeule(ScheduleNode* node, LeveledDag* dag, int start
 	{
 		if(node->parents[parentsIndex]->timeEnded != node ->timeStarted){
 			cerr <<"BROKE NODE "<< node->label << " AT TIME"<< node->timeStarted <<endl << "\tParent"<<node->parents[parentsIndex]->label <<" Ends at: "<< node->parents[parentsIndex]->timeEnded <<endl;
-			int gap =node->timeStarted - node->parents[parentsIndex]->timeEnded;
+			/*int gap =node->timeStarted - node->parents[parentsIndex]->timeEnded;
 			if(gap >0 && gap < this->gapTolerance ){
 				if(this->CreateStore(node->parents[parentsIndex],node,node->timeStarted))
 					return true;
 				else
 					return false;
 			}
-			else
+			else*/
 				return false;
 		}
 	}
@@ -212,8 +215,6 @@ bool Schedule::ScheduleNodeToBalanceChildParents(ScheduleNode* node, LeveledDag 
 		if (numParents > 1)
 		{
 			for(unsigned int pIndex=0; pIndex< numParents; ++pIndex) {
-				if(node->children[i]->parents[pIndex] != NULL)
-				cout<< node->children[i]->parents[pIndex]<<endl;
 				if (node->children[i]->parents[pIndex]->timeEnded == -1)
 					continue;//do nothign
 				else if(node->children[i]->parents[pIndex]->timeEnded < node->timeEnded){
@@ -315,13 +316,12 @@ void Schedule::Print()
 
 bool Schedule::isValid()
 {
-	for(unsigned int timeStep = 0 ; schduledNodes.size(); ++timeStep) {
-		for(unsigned int nodeIndex = 0 ; schduledNodes[timeStep].size(); ++nodeIndex) {
-			ScheduleNode* parent = schduledNodes[timeStep][nodeIndex];
-			for(unsigned int childIndex =0 ;childIndex< parent->children.size(); ++childIndex) {
-				ScheduleNode* child = parent->children[childIndex];
-				if(child->timeStarted != parent->timeEnded ){
-					cerr<<"Parent: " << parent->label << " does not match with Child: "<< child->label <<endl;
+
+	for(std:: vector< std::vector <ScheduleNode*> >::iterator timeSteps = schduledNodes.begin() ; timeSteps != schduledNodes.end(); ++timeSteps) {
+		for(std::vector <ScheduleNode*> ::iterator parent = timeSteps->begin();  parent != timeSteps->end() ; ++parent) {
+			for(std::vector <ScheduleNode*> ::iterator child = (*parent)->children.begin() ; child != (*parent)->children.end() ; ++child) {
+				if((*child)->timeStarted != (*parent)->timeEnded ){
+					cerr<<"Parent: " << (*parent)->label << " does not match with Child: "<< (*child)->label <<endl;
 					return false;
 				}
 			}
@@ -386,7 +386,7 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
 	//check for module that is already used as store.
 	if(OP->type == STORE) {
 		for(unsigned int i=0; i< availableModulesAtTimestep[time].size(); ++i) {
-			if(availableModulesAtTimestep[time][i].NumStorageUsed() > 0){
+			if(availableModulesAtTimestep[time][i]->NumStorageUsed() > 0){
 				index = i;
 				return true;
 			}
@@ -395,45 +395,45 @@ bool Schedule::CanAddOperationAtTime(ScheduleNode* OP, int time, int& index)
 
 	for(unsigned int i=0; i< availableModulesAtTimestep[time].size(); ++i)
 	{ //simple method, check to see if that resource is available.
-		bool isUsedAsStorage = availableModulesAtTimestep[time][i].NumStorageUsed() > 0;
+		bool isUsedAsStorage = availableModulesAtTimestep[time][i]->NumStorageUsed() > 0;
 		switch (OP->type) {
 		case DISPENSE:
-			if(availableModulesAtTimestep[time][i].CanDispense() && !isUsedAsStorage) {
+			if(availableModulesAtTimestep[time][i]->CanDispense() && !isUsedAsStorage) {
 				index = i;
 				return true;
 			}
 			break;
 		case DETECT:
-			if(availableModulesAtTimestep[time][i].CanDetect() && !isUsedAsStorage) {
+			if(availableModulesAtTimestep[time][i]->CanDetect() && !isUsedAsStorage) {
 				index = i;
 				return true;
 			}
 			break;
 		case HEAT:
-			if(availableModulesAtTimestep[time][i].CanHeat() && !isUsedAsStorage) {
+			if(availableModulesAtTimestep[time][i]->CanHeat() && !isUsedAsStorage) {
 				index = i;
 				return true;
 			}
 			break;
 		case MIX:
-			if(availableModulesAtTimestep[time][i].CanMix()&& !isUsedAsStorage) {
+			if(availableModulesAtTimestep[time][i]->CanMix()&& !isUsedAsStorage) {
 				index = i;
 				return true;
 			}
 			break;
 		case SPLIT:
-			if(availableModulesAtTimestep[time][i].CanSplit()&& !isUsedAsStorage)
+			if(availableModulesAtTimestep[time][i]->CanSplit()&& !isUsedAsStorage)
 				return true;
 			break;
 		case STORE:
-			if(availableModulesAtTimestep[time][i].CanStore()) {
+			if(availableModulesAtTimestep[time][i]->CanStore()) {
 				index = i;
 				return true;
 			}
 			break;
 		case WASTE:
 		case OUTPUT:
-			if(availableModulesAtTimestep[time][i].CanOutput()&& !isUsedAsStorage) {
+			if(availableModulesAtTimestep[time][i]->CanOutput()&& !isUsedAsStorage) {
 				index = i;
 				return true;
 
@@ -458,21 +458,30 @@ bool Schedule::AddOperationAtTime(ScheduleNode* OP, int time)
 
 	while(time >= this->availableModulesAtTimestep.size())
 		this->CreateNewTimeStep();
-	int index;
+	int index =-1;
 	if(CanAddOperationAtTime(OP,time,index))
 	{
+		if(index==-1)
+			return false;
 		if(OP->type==STORE)
 		{
-			if(availableModulesAtTimestep[time][index].StoreNode()){
-				if (availableModulesAtTimestep[time][index].IsStorageFull())
+			if(availableModulesAtTimestep[time][index]->StoreNode()){
+				if (availableModulesAtTimestep[time][index]->IsStorageFull()) {
+					Module * deleteME = availableModulesAtTimestep[time][index];
 					availableModulesAtTimestep[time].erase(availableModulesAtTimestep[time].begin()+index);
+					delete deleteME;
+					deleteME =NULL;
+				}
 			}
 			else
 				cerr<<"Error in trying to add a storage node to a full module.\n";
 		}
 		else
 		{
+			Module * deleteME = availableModulesAtTimestep[time][index];
 			availableModulesAtTimestep[time].erase(availableModulesAtTimestep[time].begin()+index);
+			delete deleteME;
+			deleteME= NULL;
 		}
 
 		int insertIndex = schduledNodes.size();
@@ -556,23 +565,23 @@ void Schedule::ReplaceModule(ScheduleNode* node,int time)
 	case DISPENSE:
 	case WASTE:
 	case OUTPUT:
-		availableModulesAtTimestep[time].push_back(Module("Dispense/output",0x60,0));
+		availableModulesAtTimestep[time].push_back( new Module("Dispense/output",0x60,0));
 		break;
 	case DETECT:
 	case HEAT:
 	case MIX:
 	case SPLIT:
-		availableModulesAtTimestep[time].push_back(Module("WorkerModule",0x1F,2));
+		availableModulesAtTimestep[time].push_back(new Module("WorkerModule",0x1F,2));
 		break;
 	case STORE:
 		for(unsigned int i = 0; i< availableModulesAtTimestep[time].size(); ++i) {
-			if(availableModulesAtTimestep[time][i].NumStorageUsed() > 0){
-				availableModulesAtTimestep[time][i].NumStorageUsed()-=1;
+			if(availableModulesAtTimestep[time][i]->NumStorageUsed() > 0){
+				availableModulesAtTimestep[time][i]->NumStorageUsed()-=1;
 				return;
 			}
 		}
-		availableModulesAtTimestep[time].push_back(Module("WorkerModule",0x1F,2));
-		availableModulesAtTimestep[time][availableModulesAtTimestep.size()-1].StoreNode();
+		availableModulesAtTimestep[time].push_back(new Module("WorkerModule",0x1F,2));
+		availableModulesAtTimestep[time][availableModulesAtTimestep.size()-1]->StoreNode();
 		break;
 	default:
 		break;
