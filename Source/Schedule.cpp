@@ -178,7 +178,7 @@ bool Schedule::AddStoreIfNecessary(ScheduleNode* node, bool checkParents)
 
 	//checks parents
 	//TODO:: this is somehting to look into later.
-	if(checkParents && false){
+	if(checkParents && false ){
 		for(vector<ScheduleNode*>::iterator parent = node->parents.begin(); parent != node->parents.end(); ++parent )
 		{
 			if((*parent)->timeEnded != node->timeStarted)
@@ -345,7 +345,7 @@ void Schedule::PrintRes()
 				opsUsed++;
 		}
 		int notused = availableModulesAtTimestep[i].size();
-		cout << "\n\tDIS: "<< outUsed << " Ops: " << opsUsed << " Stores: "<<stores<< "\n\tAvailable spots: "<< notused<< "Total: "<< notused+outUsed+opsUsed+(stores/2)<< endl;
+		cout << "\n\tDIS: "<< outUsed << " Ops: " << opsUsed << " Stores: "<<stores<< "\n\tTotal:  "<< notused+outUsed+opsUsed+(stores/2)<< "Available spots:"<< notused<< endl;
 
 	}
 }

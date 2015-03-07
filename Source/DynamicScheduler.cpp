@@ -62,7 +62,8 @@ int DynamicScheduler::scheduleOpReady(Schedule* schedule, std::vector<LeveledDag
 
 void DynamicScheduler:: ScheduleDag(Schedule* schedule, LeveledDag* dag, int startingAt)
 {
-	//	dag->print();
+	dag->StartingAt() = startingAt;
+//		dag->print();
 	vector<ScheduleNode*> delayedList;
 	vector<ScheduleNode*> WorkingList;
 	for(unsigned int level =0 ; level < dag->Levels().size(); ++level)
@@ -135,6 +136,8 @@ void DynamicScheduler:: RipUpNode(Schedule* schedule, ScheduleNode* OP)
 
 void DynamicScheduler :: RipUpDagAndReScheduleAt(Schedule* schedule, LeveledDag* dag, int duration)
 {
+	//schedule->Print();
+	//schedule->PrintRes();
 	dag->StartingAt() +=duration;
 
 	for(unsigned int level =0 ; level < dag->Levels().size(); ++level)
