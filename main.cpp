@@ -127,7 +127,7 @@ void GenerateFullDAGList(vector<DagGen*>& dags, int number)
 	string PathPosFix = "_256.dag";
 	char buffer[50];
 	for(int i =1; i< number; ++i) {
-		sprintf(buffer,"Inputs\\Remia%i_256.dag",i);
+		sprintf(buffer,"Inputs/Remia%i_256.dag",i);
 		dags.push_back(new DagGen(buffer));
 	}
 }
@@ -142,15 +142,15 @@ void InitalizeDAGs(vector<DagGen*>& dags, int number)
 	//	sprintf(buffer,"Inputs\\Remia%i_256.dag",i);
 	//dags.push_back(new DagGen(buffer));
 
-	dags.push_back(new DagGen("Inputs\\Remia1_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia62_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia128_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia8_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia16_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia32_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia13_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia71_256.dag"));
-	dags.push_back(new DagGen("Inputs\\Remia205_256.dag"));
+	dags.push_back(new DagGen("Inputs/Remia1_256.dag"));
+	dags.push_back(new DagGen("Inputs/Remia62_256.dag"));
+	dags.push_back(new DagGen("Inputs/Remia128_256.dag"));
+	dags.push_back(new DagGen("Inputs/Remia8_256.dag"));
+	dags.push_back(new DagGen("Inputs/Remia16_256.dag"));
+	dags.push_back(new DagGen("Inputs/Remia32_256.dag"));
+	dags.push_back(new DagGen("Inputs/Remia13_256.dag"));
+	dags.push_back(new DagGen("Inputs/Remia71_256.dag"));
+	dags.push_back(new DagGen("Inputs/Remia205_256.dag"));
 
 	//	}
 }
