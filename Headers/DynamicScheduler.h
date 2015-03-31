@@ -57,8 +57,10 @@ class DynamicScheduler {
 	private:
 
 		void RipUpNode(Schedule*,ScheduleNode*);
-		void RipUpDagAndReScheduleAt(Schedule* , LeveledDag*, int);
+		void RollBackDag(Schedule* , LeveledDag*, int);
 		void CalculateCritcalPaths(Schedule*, std::vector<LeveledDag*>&);
+
+		ScheduleType selectedScheduleType;
 
 };
 

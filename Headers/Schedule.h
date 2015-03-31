@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <cstdlib>
-#include <vector>
+#include <vector>s
 #include <map>
 #include "Device.h"
 #include "LeveledDag.h"
@@ -11,6 +11,7 @@
 struct Schedule
 {
 public:
+	std:: vector< LeveledDag* > ScheduledDags;
 	std:: vector< std::vector <Module*> > availableModulesAtTimestep;
 	std:: vector< std::vector <ScheduleNode*> > schduledNodes;
 
